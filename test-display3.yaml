@@ -1260,7 +1260,7 @@ lvgl:
             x: -340
             y: 208
             width: 300
-            height: 150
+            height: 180
             bg_color: 0x1E2230
             radius: 14
             border_width: 0
@@ -1273,7 +1273,7 @@ lvgl:
             x: 0
             y: 208
             width: 300
-            height: 150
+            height: 180
             bg_color: 0x1E2230
             radius: 14
             border_width: 0
@@ -1286,7 +1286,7 @@ lvgl:
             x: 340
             y: 208
             width: 300
-            height: 150
+            height: 180
             bg_color: 0x1E2230
             radius: 14
             border_width: 0
