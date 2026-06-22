@@ -29,6 +29,14 @@ UI a pagine: **Home** (orologio, temperature, umidità, consumi, persone), **Cas
 
 L'IO expander pilota: backlight (IO2), reset LCD (IO3), reset touch (IO1).
 
+## Case 3D (stampabile)
+
+Modelli 3D per realizzare un case / supporto a parete per il display:
+
+- [Waveshare ESP32-S3 7" Wall Mount](https://www.printables.com/model/1524435-waveshare-esp32-s3-7-inch-wall-mount)
+- [Waveshare ESP32-S3 Touch 7" LCD Wall Mount Plate](https://www.printables.com/model/1718115-waveshare-esp32-s3-touch-7-inch-lcd-wall-mount-pla)
+- [Waveshare ESP32-S3 Touch LCD 7" Case (collection)](https://www.printables.com/model/1558735-waveshare-esp32-s3-touch-lcd-7-case/collections)
+
 ## Struttura del progetto
 
 ```
@@ -92,8 +100,10 @@ Il componente espone un'API per i pin di output e il PWM del backlight, e un
 
 ## Roadmap
 
-- [x] Display, touch, UI a pagine, Home con dati live HA
-- [x] Controllo pagine da HA (select)
+- [x] Display, touch, UI a pagine, Home con dati live HA (gauge temperatura/umidità, potenza, bolletta, presenza persone)
+- [x] Controllo pagine da HA (entità `select`)
+- [x] Pagina **Energia**: tile con icone (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
+- [x] Navbar con pulsante della pagina attiva evidenziato
 - [ ] Pagina **Casa**: serratura, scene "Esco"/"Torno"
-- [ ] Pagina **Energia**: storico consumi, bolletta, auto
 - [ ] Pagina **Giardino**: sensori giardino, irrigazione
+- [ ] (opzionale) icone anche sulla Home, sincronizzazione inversa del select pagina
