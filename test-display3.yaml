@@ -82,6 +82,17 @@ font:
       - "\U000F02DA"  # history (mese scorso)
       - "\U000F140B"  # lightning-bolt (consumo)
       - "\U000F0B6C"  # car-electric (Tesla)
+      - "\U000F0A48"  # exit-run (Esco)
+      - "\U000F059C"  # weather-sunset-up (Buongiorno)
+      - "\U000F0594"  # weather-night (Buonanotte)
+      - "\U000F0176"  # coffee (Caffe)
+      - "\U000F05FA"  # kettle (Bollitore)
+      - "\U000F1099"  # air-humidifier (Deumidificatore)
+      - "\U000F070D"  # robot-vacuum (Igor)
+      - "\U000F111C"  # window-shutter (tapparelle)
+      - "\U000F0143"  # chevron-up (tapparelle su)
+      - "\U000F0140"  # chevron-down (tapparelle giu)
+      - "\U000F04DB"  # stop (tapparelle stop)
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
@@ -224,6 +235,57 @@ text_sensor:
       - lvgl.label.update:
           id: lbl_cos
           text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+  # Stato robot aspirapolvere (pagina Casa)
+  - platform: homeassistant
+    id: st_vacuum
+    entity_id: !secret ent_vacuum
+    on_value:
+      - lvgl.label.update:
+          id: lbl_igor
+          text: !lambda |-
+            if (x == "cleaning") return std::string("In pulizia");
+            if (x == "docked") return std::string("In carica");
+            if (x == "returning") return std::string("Rientro");
+            if (x == "paused") return std::string("In pausa");
+            if (x == "idle") return std::string("Fermo");
+            if (x == "error") return std::string("Errore");
+            return x;
+
+# Stato switch cucina -> colora i pulsanti quando accesi (pagina Casa)
+binary_sensor:
+  - platform: homeassistant
+    id: st_caffe
+    entity_id: !secret ent_sw_caffe
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update: { id: btn_caffe, bg_color: 0xFF7043 }
+          else:
+            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x2A2D3A }
+  - platform: homeassistant
+    id: st_bollitore
+    entity_id: !secret ent_sw_bollitore
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0xFF7043 }
+          else:
+            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x2A2D3A }
+  - platform: homeassistant
+    id: st_deum
+    entity_id: !secret ent_sw_deum
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update: { id: btn_deum, bg_color: 0x4FC3F7 }
+          else:
+            - lvgl.widget.update: { id: btn_deum, bg_color: 0x2A2D3A }
 
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
@@ -685,12 +747,145 @@ lvgl:
       bg_color: 0x15171E
       bg_opa: COVER
       widgets:
-        - label:
-            align: CENTER
-            y: -30
-            text: "Luci - Serratura - Scene"
-            text_font: montserrat_28
-            text_color: 0x9AA0B0
+        # ===== ROUTINE (script) =====
+        - label: { align: TOP_LEFT, x: 32, y: 8, text: "Routine", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - button:
+            align: TOP_MID
+            x: -340
+            y: 38
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 24, text: "\U000F0A48", text_font: font_mdi, text_color: 0x66BB6A }
+              - label: { align: LEFT_MID, x: 84, text: "Esco", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_esco } }
+        - button:
+            align: TOP_MID
+            x: 0
+            y: 38
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 18, text: "\U000F059C", text_font: font_mdi, text_color: 0xFFB74D }
+              - label: { align: LEFT_MID, x: 78, text: "Buongiorno", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_buongiorno } }
+        - button:
+            align: TOP_MID
+            x: 340
+            y: 38
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 18, text: "\U000F0594", text_font: font_mdi, text_color: 0x7986CB }
+              - label: { align: LEFT_MID, x: 78, text: "Buonanotte", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_buonanotte } }
+        # ===== CUCINA (switch toggle) =====
+        - label: { align: TOP_LEFT, x: 32, y: 146, text: "Cucina", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - button:
+            id: btn_caffe
+            align: TOP_MID
+            x: -340
+            y: 176
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 24, text: "\U000F0176", text_font: font_mdi, text_color: 0xFFFFFF }
+              - label: { align: LEFT_MID, x: 84, text: "Caffe", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_caffe } }
+        - button:
+            id: btn_bollitore
+            align: TOP_MID
+            x: 0
+            y: 176
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 18, text: "\U000F05FA", text_font: font_mdi, text_color: 0xFFFFFF }
+              - label: { align: LEFT_MID, x: 78, text: "Bollitore", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_bollitore } }
+        - button:
+            id: btn_deum
+            align: TOP_MID
+            x: 340
+            y: 176
+            width: 300
+            height: 88
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 24, text: "\U000F1099", text_font: font_mdi, text_color: 0xFFFFFF }
+              - label: { align: LEFT_MID, x: 84, text: "Deum.", text_font: montserrat_20, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_deum } }
+        # ===== PULIZIE (vacuum) =====
+        - label: { align: TOP_LEFT, x: 32, y: 284, text: "Pulizie", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - button:
+            align: TOP_MID
+            x: -242
+            y: 314
+            width: 460
+            height: 96
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: LEFT_MID, x: 26, text: "\U000F070D", text_font: font_mdi, text_color: 0x4FC3F7 }
+              - label: { align: LEFT_MID, x: 92, text: "Igor", text_font: montserrat_28, text_color: 0xFFFFFF }
+              - label: { id: lbl_igor, align: RIGHT_MID, x: -24, text: "--", text_font: montserrat_20, text_color: 0x9AA0B0 }
+            on_click:
+              - homeassistant.service: { service: vacuum.start, data: { entity_id: !secret ent_vacuum } }
+        # ===== TAPPARELLE (cover) =====
+        - label: { align: TOP_MID, x: 250, y: 284, text: "Tapparelle", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - button:
+            align: TOP_MID
+            x: 95
+            y: 314
+            width: 150
+            height: 96
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: CENTER, text: "\U000F0143", text_font: font_mdi, text_color: 0x66BB6A }
+            on_click:
+              - homeassistant.service: { service: cover.open_cover, data: { entity_id: !secret ent_cover_tapparelle } }
+        - button:
+            align: TOP_MID
+            x: 255
+            y: 314
+            width: 150
+            height: 96
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: CENTER, text: "\U000F04DB", text_font: font_mdi, text_color: 0xEF5350 }
+            on_click:
+              - homeassistant.service: { service: cover.stop_cover, data: { entity_id: !secret ent_cover_tapparelle } }
+        - button:
+            align: TOP_MID
+            x: 415
+            y: 314
+            width: 150
+            height: 96
+            bg_color: 0x2A2D3A
+            radius: 12
+            widgets:
+              - label: { align: CENTER, text: "\U000F0140", text_font: font_mdi, text_color: 0xFFB74D }
+            on_click:
+              - homeassistant.service: { service: cover.close_cover, data: { entity_id: !secret ent_cover_tapparelle } }
         - obj:
             align: BOTTOM_MID
             width: 1024

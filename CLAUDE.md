@@ -53,6 +53,12 @@ I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → l
 ### Home Assistant: ricaricare l'integrazione dopo ogni flash
 I sensori `platform: homeassistant` restano **vuoti** finché non si ricarica l'integrazione ESPHome in HA dopo un flash (il subscribe degli stati non si ristabilisce da solo). Le entità esposte possono sparire allo stesso modo. Inoltre: le `Connection reset by peer` viste con `esphome logs` mentre HA è connesso sono il client di log che compete — NON instabilità reale.
 
+### Controlli interattivi verso Home Assistant (pagina Casa)
+Per comandare HA dalla plancia (eseguire script, toggle switch, avviare il robot, muovere le tapparelle) si usa `homeassistant.service` nell'`on_click` dei pulsanti LVGL (ESPHome lo traduce in azione `action:`). Esempi usati: `script.turn_on`, `switch.toggle`, `vacuum.start`, `cover.open_cover`/`stop_cover`/`close_cover`. L'`entity_id` è un `!secret`.
+- **PREREQUISITO**: in HA, nell'integrazione ESPHome del device, abilitare **"Consenti al dispositivo di eseguire azioni di Home Assistant"** (Configura). Senza, i pulsanti non agiscono.
+- **Feedback di stato** (es. switch acceso → pulsante colorato): `binary_sensor` / `text_sensor` `platform: homeassistant` con `on_state`/`on_value` → `lvgl.widget.update` (bg_color) o `lvgl.label.update`. I pulsanti da aggiornare hanno un `id`.
+- **Layout pulsanti**: icona MDI + testo **affiancati in orizzontale** (`align: LEFT_MID` con `x` diversi); impilarli verticalmente in pulsanti bassi li fa sovrapporre.
+
 ## Hardware — dati certi
 
 | Parametro | Valore |
@@ -167,7 +173,7 @@ Vedi `secrets.yaml.example` per il modello da compilare.
 2. ✅ Controllo pagine da HA (entità `select`)
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
-5. **Casa**: serratura, scene "Esco"/"Torno"
+5. ✅ Pagina **Casa**: Routine (script Esco/Buongiorno/Buonanotte), Cucina (switch Caffè/Bollitore/Deum. con feedback colore), Pulizie (robot Igor), Tapparelle (su/stop/giù)
 6. **Giardino**: umidità, temperature, irrigazione
 7. (opzionale) icone anche sulla Home; sync inversa del select pagina
 8. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
