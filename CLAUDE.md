@@ -42,8 +42,13 @@ Un `interval: 1s` con `lvgl.label.update` **crashava il boot** (→ safe mode). 
 ### LVGL: il widget `chart` NON esiste in ESPHome
 Non c'è alcun widget `chart` né azioni `lvgl.chart.*` (e `LV_USE_CHART` è forzato a 0 in build con LVGL v9). Per i grafici: usare il widget **`meter`** (gauge/lancetta) — supportato — oppure il componente `graph` (ma disegna fuori da LVGL). I gauge sono anche fedeli alla dashboard HA che l'utente usava prima.
 
-### Barra di navigazione: NON nel `top_layer`
-I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile. Mettere la navbar **dentro ogni pagina**, definita una volta come anchor YAML (`&navbar`) e riusata con `*navbar`.
+### Barra di navigazione: NON nel `top_layer`, e una per pagina
+I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → la navbar va **dentro ogni pagina**. Inoltre, per evidenziare il pulsante della pagina attiva (bg blu `0x2196F3` vs grigio `0x2A2D3A`) NON si può usare un anchor condiviso (i widget LVGL non si aggiornano via anchor, e gli id non possono duplicarsi): serve una **navbar inline per pagina**, ognuna col proprio pulsante evidenziato. Le pagine non hanno titolo in alto (lo stato è dato dal pulsante attivo).
+
+### Icone e font speciali
+- **Icone Material Design**: font `font_mdi` scaricato in build (`type: web`, url del webfont Templarian/MaterialDesign-Webfont), glyphs per **codepoint** `"\U000Fxxxx"` (no supporto nativo `mdi:`). Verificare i codepoint su pictogrammers.com. Una label = un solo font.
+- **Simboli `°` e `€`**: non presenti nei font LVGL di default → font custom via `gfonts://Montserrat` con `glyphs` mirati (`font_temp` per °, `font_euro` per €/kWh).
+- I valori dei sensori si aggiornano con `on_value` → `lvgl.label.update` (mai `interval` grezzo).
 
 ### Home Assistant: ricaricare l'integrazione dopo ogni flash
 I sensori `platform: homeassistant` restano **vuoti** finché non si ricarica l'integrazione ESPHome in HA dopo un flash (il subscribe degli stati non si ristabilisce da solo). Le entità esposte possono sparire allo stesso modo. Inoltre: le `Connection reset by peer` viste con `esphome logs` mentre HA è connesso sono il client di log che compete — NON instabilità reale.
@@ -158,9 +163,11 @@ Vedi `secrets.yaml.example` per il modello da compilare.
 
 ## Roadmap
 
-1. ✅ Display, touch, UI a pagine, orologio, dati live HA sulla Home
-2. **Home**: gauge consumi (widget `meter`), poi rifiniture
-3. **Casa**: serratura, scene "Esco"/"Torno"
-4. **Energia**: bolletta mensile, potenza, auto
-5. **Giardino**: umidità, temperature, irrigazione
-6. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
+1. ✅ Display, touch, UI a pagine, orologio, dati live HA sulla Home (gauge temp/umidità, potenza, bolletta, persone)
+2. ✅ Controllo pagine da HA (entità `select`)
+3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
+4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
+5. **Casa**: serratura, scene "Esco"/"Torno"
+6. **Giardino**: umidità, temperature, irrigazione
+7. (opzionale) icone anche sulla Home; sync inversa del select pagina
+8. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
