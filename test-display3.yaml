@@ -59,12 +59,29 @@ io_extension_ws:
   - id: io_ext
     i2c_id: bus_a
 
-# Font con il simbolo gradi (°) per i valori di temperatura
+# Font con simboli speciali (° per temperature, € per importi)
 font:
   - file: "gfonts://Montserrat"
     id: font_temp
     size: 28
     glyphs: "-.0123456789°"
+  - file: "gfonts://Montserrat"
+    id: font_euro
+    size: 30
+    glyphs: "-.,0123456789€kWh "
+  # Icone Material Design (scaricate in build dal webfont MDI)
+  - file:
+      type: web
+      url: "https://github.com/Templarian/MaterialDesign-Webfont/raw/master/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi
+    size: 40
+    bpp: 4
+    glyphs:
+      - "\U000F0114"  # cash (spesa oggi)
+      - "\U000F1A91"  # cash-clock (previsione mese)
+      - "\U000F02DA"  # history (mese scorso)
+      - "\U000F140B"  # lightning-bolt (consumo)
+      - "\U000F0B6C"  # car-electric (Tesla)
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
@@ -120,6 +137,9 @@ sensor:
       - lvgl.label.update:
           id: lbl_bol
           text: !lambda 'return str_sprintf("%.0f", x);'
+      - lvgl.label.update:
+          id: lbl_e_previsione
+          text: !lambda 'return str_sprintf("%.2f €", x);'
   # --- Temperature (arc -10..50) ---
   - platform: homeassistant
     id: temp_giardino
@@ -151,18 +171,54 @@ sensor:
       - lvgl.label.update:
           id: lbl_t_c
           text: !lambda 'return str_sprintf("%.1f°", x);'
+  # --- Energia (pagina Energia) ---
+  - platform: homeassistant
+    id: costo_oggi
+    entity_id: !secret ent_costo_oggi
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_oggi
+          text: !lambda 'return str_sprintf("%.2f €", x);'
+  - platform: homeassistant
+    id: costo_mese_prec
+    entity_id: !secret ent_costo_mese_prec
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_prec
+          text: !lambda 'return str_sprintf("%.2f €", x);'
+  - platform: homeassistant
+    id: consumo_mensile
+    entity_id: !secret ent_consumo_mensile
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_consumo
+          text: !lambda 'return str_sprintf("%.0f kWh", x);'
+  - platform: homeassistant
+    id: tesla_costo
+    entity_id: !secret ent_tesla_costo
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_tesla_eur
+          text: !lambda 'return str_sprintf("%.2f €", x);'
+  - platform: homeassistant
+    id: tesla_kwh
+    entity_id: !secret ent_tesla_kwh
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_tesla_kwh
+          text: !lambda 'return str_sprintf("%.0f kWh", x);'
 
 # --- Persone (stato casa/fuori) ---
 text_sensor:
   - platform: homeassistant
-    id: pers_francesco
+    id: pers_1
     entity_id: !secret ent_persona1
     on_value:
       - lvgl.label.update:
           id: lbl_fra
           text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
   - platform: homeassistant
-    id: pers_costanza
+    id: pers_2
     entity_id: !secret ent_persona2
     on_value:
       - lvgl.label.update:
@@ -555,7 +611,7 @@ lvgl:
             text_font: montserrat_20
             text_color: 0x9AA0B0
         # Barra di navigazione (definita qui come anchor, riusata sulle altre pagine)
-        - obj: &navbar
+        - obj:
             align: BOTTOM_MID
             width: 1024
             height: 92
@@ -570,7 +626,7 @@ lvgl:
                   x: 4
                   width: 248
                   height: 80
-                  bg_color: 0x2A2D3A
+                  bg_color: 0x2196F3
                   radius: 12
                   widgets:
                     - label:
@@ -630,52 +686,363 @@ lvgl:
       bg_opa: COVER
       widgets:
         - label:
-            align: TOP_MID
-            y: 50
-            text: "CASA"
-            text_font: montserrat_48
-            text_color: 0xFFFFFF
-        - label:
             align: CENTER
             y: -30
             text: "Luci - Serratura - Scene"
             text_font: montserrat_28
             text_color: 0x9AA0B0
-        - obj: *navbar
+        - obj:
+            align: BOTTOM_MID
+            width: 1024
+            height: 92
+            bg_color: 0x0B0D12
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            widgets:
+              - button:
+                  align: LEFT_MID
+                  x: 4
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Home", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_home
+              - button:
+                  align: LEFT_MID
+                  x: 260
+                  width: 248
+                  height: 80
+                  bg_color: 0x2196F3
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Casa", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_casa
+              - button:
+                  align: LEFT_MID
+                  x: 516
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Energia", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_energia
+              - button:
+                  align: LEFT_MID
+                  x: 772
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Giardino", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_giardino
     - id: page_energia
       bg_color: 0x15171E
       bg_opa: COVER
       widgets:
-        - label:
+        # --- Riga 1: spesa elettrica (EUR) ---
+        - obj:
             align: TOP_MID
-            y: 50
-            text: "ENERGIA"
-            text_font: montserrat_48
-            text_color: 0xFFFFFF
-        - label:
-            align: CENTER
-            y: -30
-            text: "Consumi - Auto - Prezzo kWh"
-            text_font: montserrat_28
-            text_color: 0x9AA0B0
-        - obj: *navbar
+            x: -340
+            y: 62
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F0114"
+                  text_font: font_mdi
+                  text_color: 0xFFD54F
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Spesa oggi"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_oggi
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0xFFD54F
+        - obj:
+            align: TOP_MID
+            x: 0
+            y: 62
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F1A91"
+                  text_font: font_mdi
+                  text_color: 0xFFB74D
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Previsione mese"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_previsione
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0xFFB74D
+        - obj:
+            align: TOP_MID
+            x: 340
+            y: 62
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F02DA"
+                  text_font: font_mdi
+                  text_color: 0xB0BEC5
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Mese scorso"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_prec
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0xB0BEC5
+        # --- Riga 2: consumo + Tesla ---
+        - obj:
+            align: TOP_MID
+            x: -340
+            y: 248
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F140B"
+                  text_font: font_mdi
+                  text_color: 0x4FC3F7
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Consumo mese"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_consumo
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0x4FC3F7
+        - obj:
+            align: TOP_MID
+            x: 0
+            y: 248
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F0B6C"
+                  text_font: font_mdi
+                  text_color: 0xEF5350
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Tesla mese"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_tesla_eur
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0xEF5350
+        - obj:
+            align: TOP_MID
+            x: 340
+            y: 248
+            width: 300
+            height: 180
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 12
+                  text: "\U000F0B6C"
+                  text_font: font_mdi
+                  text_color: 0xFF8A65
+              - label:
+                  align: TOP_MID
+                  y: 66
+                  text: "Tesla kWh mese"
+                  text_font: montserrat_16
+                  text_color: 0x9AA0B0
+              - label:
+                  id: lbl_e_tesla_kwh
+                  align: BOTTOM_MID
+                  y: -16
+                  text: "--"
+                  text_font: font_euro
+                  text_color: 0xFF8A65
+        - obj:
+            align: BOTTOM_MID
+            width: 1024
+            height: 92
+            bg_color: 0x0B0D12
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            widgets:
+              - button:
+                  align: LEFT_MID
+                  x: 4
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Home", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_home
+              - button:
+                  align: LEFT_MID
+                  x: 260
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Casa", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_casa
+              - button:
+                  align: LEFT_MID
+                  x: 516
+                  width: 248
+                  height: 80
+                  bg_color: 0x2196F3
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Energia", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_energia
+              - button:
+                  align: LEFT_MID
+                  x: 772
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Giardino", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_giardino
     - id: page_giardino
       bg_color: 0x15171E
       bg_opa: COVER
       widgets:
-        - label:
-            align: TOP_MID
-            y: 50
-            text: "GIARDINO"
-            text_font: montserrat_48
-            text_color: 0xFFFFFF
         - label:
             align: CENTER
             y: -30
             text: "Irrigazione - Sensori"
             text_font: montserrat_28
             text_color: 0x9AA0B0
-        - obj: *navbar
+        - obj:
+            align: BOTTOM_MID
+            width: 1024
+            height: 92
+            bg_color: 0x0B0D12
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            widgets:
+              - button:
+                  align: LEFT_MID
+                  x: 4
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Home", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_home
+              - button:
+                  align: LEFT_MID
+                  x: 260
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Casa", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_casa
+              - button:
+                  align: LEFT_MID
+                  x: 516
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Energia", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_energia
+              - button:
+                  align: LEFT_MID
+                  x: 772
+                  width: 248
+                  height: 80
+                  bg_color: 0x2196F3
+                  radius: 12
+                  widgets:
+                    - label: { align: CENTER, text: "Giardino", text_font: montserrat_28, text_color: 0xFFFFFF }
+                  on_click:
+                    - lvgl.page.show: page_giardino
 
 # Select esposto a HA per cambiare pagina da automazioni
 # (es. action: select.select_option -> "Energia")
