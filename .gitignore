@@ -1,0 +1,12 @@
+# --- ESPHome ---
+/.esphome/
+
+# --- Dati personali / credenziali (NON versionare) ---
+# secrets.yaml contiene WiFi, entity_id HA e nomi: tenerlo fuori dal repo.
+/secrets.yaml
+
+# --- Editor / tool locali ---
+/.claude/
+.DS_Store
+__pycache__/
+*.pyc
