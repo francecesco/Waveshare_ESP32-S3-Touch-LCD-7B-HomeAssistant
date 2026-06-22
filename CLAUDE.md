@@ -174,6 +174,7 @@ Vedi `secrets.yaml.example` per il modello da compilare.
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
 5. ✅ Pagina **Casa**: Routine (script Esco/Buongiorno/Buonanotte), Cucina (switch Caffè/Bollitore/Deum. con feedback colore), Pulizie (robot Igor), Tapparelle (su/stop/giù)
-6. **Giardino**: umidità, temperature, irrigazione
-7. (opzionale) icone anche sulla Home; sync inversa del select pagina
-8. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
+6. ✅ Pagina **Giardino**: luce cucina esterna (toggle), consumo cucina, temperatura/umidità giardino, portafinestra (icona aperta/chiusa)
+7. **Gestione accensione display**: al tocco si accende, dopo **30 s di inutilizzo** si spegne il backlight (LVGL `on_idle` → backlight off via `io_extension_ws`; riaccensione su evento touch)
+8. (opzionale) icone anche sulla Home; sync inversa del select pagina
+9. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
