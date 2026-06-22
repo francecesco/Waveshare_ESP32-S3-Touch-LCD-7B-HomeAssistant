@@ -1,0 +1,738 @@
+# ============================================================================
+#  TEST DISPLAY v17 — LVGL!
+#  Il bus RGB e il path di disegno funzionano (show_test_card mostrava le
+#  barre RGB). Passiamo a LVGL: schermata bianca (test backlight) + rettangoli
+#  rosso/blu etichettati (validazione color_order).
+#
+#  Carica:  esphome run test-display3.yaml --device test-plancia.local
+# ============================================================================
+
+esphome:
+  name: test-plancia
+  friendly_name: Test Plancia
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ io_extension_ws ]
+
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240: "y"
+      CONFIG_SPIRAM_MODE_OCT: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
+      CONFIG_SPIRAM_RODATA: "y"
+      CONFIG_LCD_RGB_RESTART_IN_VSYNC: "y"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Test-Plancia Fallback"
+
+api:
+
+ota:
+  - platform: esphome
+
+i2c:
+  - id: bus_a
+    sda: GPIO8
+    scl: GPIO9
+    scan: true
+    frequency: 100kHz
+
+io_extension_ws:
+  - id: io_ext
+    i2c_id: bus_a
+
+# Font con il simbolo gradi (°) per i valori di temperatura
+font:
+  - file: "gfonts://Montserrat"
+    id: font_temp
+    size: 28
+    glyphs: "-.0123456789°"
+
+# --- Sensori da Home Assistant (ricevuti via API) ---
+sensor:
+  # --- Umidità (arc 0-100%) ---
+  - platform: homeassistant
+    id: um_giardino
+    entity_id: !secret ent_um_giardino
+    on_value:
+      - lvgl.arc.update:
+          id: arc_um_g
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_um_g
+          text: !lambda 'return str_sprintf("%.0f%%", x);'
+  - platform: homeassistant
+    id: um_sala
+    entity_id: !secret ent_um_sala
+    on_value:
+      - lvgl.arc.update:
+          id: arc_um_s
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_um_s
+          text: !lambda 'return str_sprintf("%.0f%%", x);'
+  - platform: homeassistant
+    id: um_camera
+    entity_id: !secret ent_um_camera
+    on_value:
+      - lvgl.arc.update:
+          id: arc_um_c
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_um_c
+          text: !lambda 'return str_sprintf("%.0f%%", x);'
+  # --- Energia ---
+  - platform: homeassistant
+    id: potenza
+    entity_id: !secret ent_potenza
+    on_value:
+      - lvgl.arc.update:
+          id: arc_pot
+          value: !lambda 'return (int)(x * 100);'
+      - lvgl.label.update:
+          id: lbl_pot
+          text: !lambda 'return str_sprintf("%.2f", x);'
+  - platform: homeassistant
+    id: bolletta
+    entity_id: !secret ent_bolletta
+    on_value:
+      - lvgl.arc.update:
+          id: arc_bol
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_bol
+          text: !lambda 'return str_sprintf("%.0f", x);'
+  # --- Temperature (arc -10..50) ---
+  - platform: homeassistant
+    id: temp_giardino
+    entity_id: !secret ent_temp_giardino
+    on_value:
+      - lvgl.arc.update:
+          id: arc_t_g
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_t_g
+          text: !lambda 'return str_sprintf("%.1f°", x);'
+  - platform: homeassistant
+    id: temp_sala
+    entity_id: !secret ent_temp_sala
+    on_value:
+      - lvgl.arc.update:
+          id: arc_t_s
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_t_s
+          text: !lambda 'return str_sprintf("%.1f°", x);'
+  - platform: homeassistant
+    id: temp_camera
+    entity_id: !secret ent_temp_camera
+    on_value:
+      - lvgl.arc.update:
+          id: arc_t_c
+          value: !lambda 'return x;'
+      - lvgl.label.update:
+          id: lbl_t_c
+          text: !lambda 'return str_sprintf("%.1f°", x);'
+
+# --- Persone (stato casa/fuori) ---
+text_sensor:
+  - platform: homeassistant
+    id: pers_francesco
+    entity_id: !secret ent_persona1
+    on_value:
+      - lvgl.label.update:
+          id: lbl_fra
+          text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+  - platform: homeassistant
+    id: pers_costanza
+    entity_id: !secret ent_persona2
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cos
+          text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+
+# Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
+time:
+  - platform: sntp
+    id: ora
+    timezone: Europe/Rome
+    on_time:
+      - seconds: /20
+        then:
+          - lvgl.label.update:
+              id: lbl_clock
+              text: !lambda |-
+                auto t = id(ora).now();
+                if (!t.is_valid()) return std::string("--:--");
+                char buf[8];
+                snprintf(buf, sizeof(buf), "%02d:%02d", t.hour, t.minute);
+                return std::string(buf);
+          - lvgl.label.update:
+              id: lbl_date
+              text: !lambda |-
+                auto t = id(ora).now();
+                if (!t.is_valid()) return std::string("");
+                static const char* gg[] = {"Domenica","Lunedi","Martedi","Mercoledi","Giovedi","Venerdi","Sabato"};
+                static const char* mm[] = {"gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"};
+                int dow = t.day_of_week, mo = t.month;
+                if (dow < 1 || dow > 7 || mo < 1 || mo > 12) return std::string("");
+                char buf[48];
+                snprintf(buf, sizeof(buf), "%s %d %s", gg[dow-1], t.day_of_month, mm[mo-1]);
+                return std::string(buf);
+
+# --- DISPLAY mipi_rgb: ora pilotato da LVGL (niente lambda/test_card) ---
+display:
+  - platform: mipi_rgb
+    id: lcd
+    model: RPI
+    auto_clear_enabled: false
+    color_order: BGR
+    pixel_mode: 16bit
+    pclk_frequency: 30MHz   # 50MHz causava crash al boot -> rollback OTA. 30MHz stabile.
+    pclk_inverted: true
+    dimensions:
+      width: 1024
+      height: 600
+    de_pin: GPIO5
+    hsync_pin: GPIO46
+    vsync_pin: GPIO3
+    pclk_pin: GPIO7
+    hsync_pulse_width: 162
+    hsync_back_porch: 152
+    hsync_front_porch: 48
+    vsync_pulse_width: 45
+    vsync_back_porch: 13
+    vsync_front_porch: 3
+    # Ordine fisico Waveshare data0->data15 mappato su RGB565:
+    # data0-4 = blue, data5-10 = green, data11-15 = red
+    data_pins:
+      blue:  [GPIO14, GPIO38, GPIO18, GPIO17, GPIO10]
+      green: [GPIO39, GPIO0,  GPIO45, GPIO48, GPIO47, GPIO21]
+      red:   [GPIO1,  GPIO2,  GPIO42, GPIO41, GPIO40]
+
+# --- TOUCH GT911 ---
+# INT su GPIO4 (diretto ESP32). Reset via IO1 dell'expander, già rilasciato
+# (OUTPUT=0xFF nel setup di io_extension_ws). Il GT911 si auto-inizializza a 0x5D.
+touchscreen:
+  - platform: gt911
+    id: my_touch
+    interrupt_pin: GPIO4
+    address: 0x5D
+    # reset hardware del GT911 via IO1 dell'expander -> init affidabile ad ogni boot
+    reset_pin:
+      io_extension_ws: io_ext
+      number: 1
+      mode:
+        output: true
+
+# --- LVGL: UI a pagine ---
+lvgl:
+  buffer_size: 25%      # buffer ridotto -> libera RAM interna, stabilizza l'API
+  displays:
+    - lcd
+  touchscreens:
+    - my_touch
+  pages:
+    - id: page_home
+      bg_color: 0x15171E
+      bg_opa: COVER
+      widgets:
+        # ===== HEADER: ORA + DATA (sx) e PERSONE (dx) =====
+        - label:
+            id: lbl_clock
+            align: TOP_LEFT
+            x: 30
+            y: 8
+            text: "--:--"
+            text_font: montserrat_48
+            text_color: 0xFFFFFF
+        - label:
+            id: lbl_date
+            align: TOP_LEFT
+            x: 32
+            y: 66
+            text: "sincronizzazione..."
+            text_font: montserrat_20
+            text_color: 0x9AA0B0
+        - obj:
+            align: TOP_RIGHT
+            x: -250
+            y: 8
+            width: 215
+            height: 90
+            bg_color: 0x2A2D3A
+            radius: 12
+            border_width: 0
+            pad_all: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 10
+                  text: !secret nome_persona1
+                  text_font: montserrat_16
+                  text_color: 0xFFFFFF
+              - label:
+                  id: lbl_fra
+                  align: BOTTOM_MID
+                  y: -12
+                  text: "--"
+                  text_font: montserrat_18
+                  text_color: 0x66BB6A
+        - obj:
+            align: TOP_RIGHT
+            x: -25
+            y: 8
+            width: 215
+            height: 90
+            bg_color: 0x2A2D3A
+            radius: 12
+            border_width: 0
+            pad_all: 0
+            widgets:
+              - label:
+                  align: TOP_MID
+                  y: 10
+                  text: !secret nome_persona2
+                  text_font: montserrat_16
+                  text_color: 0xFFFFFF
+              - label:
+                  id: lbl_cos
+                  align: BOTTOM_MID
+                  y: -12
+                  text: "--"
+                  text_font: montserrat_18
+                  text_color: 0x66BB6A
+        # ===== FILA 1: TEMPERATURE (x3) + UMIDITA' (x3) =====
+        - arc:
+            id: arc_t_g
+            align: TOP_MID
+            x: -425
+            y: 105
+            width: 125
+            height: 125
+            min_value: -10
+            max_value: 50
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x66BB6A
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_t_g
+                  align: CENTER
+                  text: "--"
+                  text_font: font_temp
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: -425
+            y: 233
+            text: "Giardino"
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_t_s
+            align: TOP_MID
+            x: -255
+            y: 105
+            width: 125
+            height: 125
+            min_value: -10
+            max_value: 50
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x66BB6A
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_t_s
+                  align: CENTER
+                  text: "--"
+                  text_font: font_temp
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: -255
+            y: 233
+            text: "Sala"
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_t_c
+            align: TOP_MID
+            x: -85
+            y: 105
+            width: 125
+            height: 125
+            min_value: -10
+            max_value: 50
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x66BB6A
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_t_c
+                  align: CENTER
+                  text: "--"
+                  text_font: font_temp
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: -85
+            y: 233
+            text: "Camera"
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_um_g
+            align: TOP_MID
+            x: 85
+            y: 105
+            width: 125
+            height: 125
+            min_value: 0
+            max_value: 100
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x29B6F6
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_um_g
+                  align: CENTER
+                  text: "--"
+                  text_font: montserrat_28
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: 85
+            y: 233
+            text: "Um. Giard."
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_um_s
+            align: TOP_MID
+            x: 255
+            y: 105
+            width: 125
+            height: 125
+            min_value: 0
+            max_value: 100
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x29B6F6
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_um_s
+                  align: CENTER
+                  text: "--"
+                  text_font: montserrat_28
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: 255
+            y: 233
+            text: "Um. Sala"
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_um_c
+            align: TOP_MID
+            x: 425
+            y: 105
+            width: 125
+            height: 125
+            min_value: 0
+            max_value: 100
+            value: 0
+            arc_width: 10
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0x29B6F6
+              arc_width: 10
+            widgets:
+              - label:
+                  id: lbl_um_c
+                  align: CENTER
+                  text: "--"
+                  text_font: montserrat_28
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: 425
+            y: 233
+            text: "Um. Cam."
+            text_font: montserrat_16
+            text_color: 0x9AA0B0
+        # ===== FILA 2: POTENZA + BOLLETTA (grandi) =====
+        - arc:
+            id: arc_pot
+            align: TOP_MID
+            x: -245
+            y: 270
+            width: 165
+            height: 165
+            min_value: 0
+            max_value: 350
+            value: 0
+            arc_width: 14
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0xFFD54F
+              arc_width: 14
+            widgets:
+              - label:
+                  id: lbl_pot
+                  align: CENTER
+                  text: "--"
+                  text_font: montserrat_40
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: -245
+            y: 440
+            text: "Potenza kW"
+            text_font: montserrat_20
+            text_color: 0x9AA0B0
+        - arc:
+            id: arc_bol
+            align: TOP_MID
+            x: 245
+            y: 270
+            width: 165
+            height: 165
+            min_value: 22
+            max_value: 150
+            value: 22
+            arc_width: 14
+            arc_color: 0x2A2D3A
+            indicator:
+              arc_color: 0xAB47BC
+              arc_width: 14
+            widgets:
+              - label:
+                  id: lbl_bol
+                  align: CENTER
+                  text: "--"
+                  text_font: montserrat_40
+                  text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            x: 245
+            y: 440
+            text: "Bolletta EUR"
+            text_font: montserrat_20
+            text_color: 0x9AA0B0
+        # Barra di navigazione (definita qui come anchor, riusata sulle altre pagine)
+        - obj: &navbar
+            align: BOTTOM_MID
+            width: 1024
+            height: 92
+            bg_color: 0x0B0D12
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            widgets:
+              - button:
+                  align: LEFT_MID
+                  x: 4
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Home"
+                        text_font: montserrat_28
+                        text_color: 0xFFFFFF
+                  on_click:
+                    - lvgl.page.show: page_home
+              - button:
+                  align: LEFT_MID
+                  x: 260
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Casa"
+                        text_font: montserrat_28
+                        text_color: 0xFFFFFF
+                  on_click:
+                    - lvgl.page.show: page_casa
+              - button:
+                  align: LEFT_MID
+                  x: 516
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Energia"
+                        text_font: montserrat_28
+                        text_color: 0xFFFFFF
+                  on_click:
+                    - lvgl.page.show: page_energia
+              - button:
+                  align: LEFT_MID
+                  x: 772
+                  width: 248
+                  height: 80
+                  bg_color: 0x2A2D3A
+                  radius: 12
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Giardino"
+                        text_font: montserrat_28
+                        text_color: 0xFFFFFF
+                  on_click:
+                    - lvgl.page.show: page_giardino
+    - id: page_casa
+      bg_color: 0x15171E
+      bg_opa: COVER
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 50
+            text: "CASA"
+            text_font: montserrat_48
+            text_color: 0xFFFFFF
+        - label:
+            align: CENTER
+            y: -30
+            text: "Luci - Serratura - Scene"
+            text_font: montserrat_28
+            text_color: 0x9AA0B0
+        - obj: *navbar
+    - id: page_energia
+      bg_color: 0x15171E
+      bg_opa: COVER
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 50
+            text: "ENERGIA"
+            text_font: montserrat_48
+            text_color: 0xFFFFFF
+        - label:
+            align: CENTER
+            y: -30
+            text: "Consumi - Auto - Prezzo kWh"
+            text_font: montserrat_28
+            text_color: 0x9AA0B0
+        - obj: *navbar
+    - id: page_giardino
+      bg_color: 0x15171E
+      bg_opa: COVER
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 50
+            text: "GIARDINO"
+            text_font: montserrat_48
+            text_color: 0xFFFFFF
+        - label:
+            align: CENTER
+            y: -30
+            text: "Irrigazione - Sensori"
+            text_font: montserrat_28
+            text_color: 0x9AA0B0
+        - obj: *navbar
+
+# Select esposto a HA per cambiare pagina da automazioni
+# (es. action: select.select_option -> "Energia")
+select:
+  - platform: template
+    name: "Pagina plancia"
+    id: sel_pagina
+    optimistic: true
+    options:
+      - "Home"
+      - "Casa"
+      - "Energia"
+      - "Giardino"
+    initial_option: "Home"
+    set_action:
+      - if:
+          condition:
+            lambda: 'return x == "Home";'
+          then:
+            - lvgl.page.show: page_home
+      - if:
+          condition:
+            lambda: 'return x == "Casa";'
+          then:
+            - lvgl.page.show: page_casa
+      - if:
+          condition:
+            lambda: 'return x == "Energia";'
+          then:
+            - lvgl.page.show: page_energia
+      - if:
+          condition:
+            lambda: 'return x == "Giardino";'
+          then:
+            - lvgl.page.show: page_giardino
+
+button:
+  - platform: template
+    name: "Backlight ON"
+    on_press:
+      - lambda: 'id(io_ext).set_output_pin(2, true); id(io_ext).set_pwm(200);'
+  - platform: template
+    name: "Backlight OFF"
+    on_press:
+      - lambda: 'id(io_ext).set_output_pin(2, false);'
+
+# Slider luminosità backlight (regolazione live da Home Assistant)
+# Registro PWM diretto: 0 = minimo, ~247 = massimo, 255 = spento.
+# Sposta il valore per trovare il punto più luminoso senza flicker.
+number:
+  - platform: template
+    name: "Luminosita backlight"
+    id: backlight_level
+    min_value: 0
+    max_value: 247
+    step: 1
+    initial_value: 200
+    optimistic: true
+    set_action:
+      - lambda: 'id(io_ext).set_pwm((uint8_t) x);'
