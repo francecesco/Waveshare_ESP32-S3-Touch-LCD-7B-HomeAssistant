@@ -93,6 +93,12 @@ font:
       - "\U000F0143"  # chevron-up (tapparelle su)
       - "\U000F0140"  # chevron-down (tapparelle giu)
       - "\U000F04DB"  # stop (tapparelle stop)
+      - "\U000F050F"  # thermometer (temp giardino)
+      - "\U000F058E"  # water-percent (umidita giardino)
+      - "\U000F0335"  # lightbulb (luce cucina esterna)
+      - "\U000F0241"  # flash (consumo cucina)
+      - "\U000F11DC"  # window-open-variant (portafinestra aperta)
+      - "\U000F11DB"  # window-closed-variant (portafinestra chiusa)
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
@@ -106,6 +112,9 @@ sensor:
           value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_um_g
+          text: !lambda 'return str_sprintf("%.0f%%", x);'
+      - lvgl.label.update:
+          id: lbl_g_um
           text: !lambda 'return str_sprintf("%.0f%%", x);'
   - platform: homeassistant
     id: um_sala
@@ -161,6 +170,9 @@ sensor:
           value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_t_g
+          text: !lambda 'return str_sprintf("%.1f°", x);'
+      - lvgl.label.update:
+          id: lbl_g_temp
           text: !lambda 'return str_sprintf("%.1f°", x);'
   - platform: homeassistant
     id: temp_sala
@@ -218,6 +230,14 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_tesla_kwh
           text: !lambda 'return str_sprintf("%.0f kWh", x);'
+  # --- Giardino: consumo cucina esterna ---
+  - platform: homeassistant
+    id: consumo_cucina
+    entity_id: !secret ent_consumo_cucina
+    on_value:
+      - lvgl.label.update:
+          id: lbl_g_consumo
+          text: !lambda 'return str_sprintf("%.0f W", x);'
 
 # --- Persone (stato casa/fuori) ---
 text_sensor:
@@ -286,6 +306,32 @@ binary_sensor:
             - lvgl.widget.update: { id: btn_deum, bg_color: 0x4FC3F7 }
           else:
             - lvgl.widget.update: { id: btn_deum, bg_color: 0x2A2D3A }
+  # --- Giardino: luce cucina esterna (colore se accesa) ---
+  - platform: homeassistant
+    id: st_luce_cucina
+    entity_id: !secret ent_luce_cucina_est
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0xFBC02D }
+          else:
+            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x2A2D3A }
+  # --- Giardino: portafinestra (icona + testo aperta/chiusa) ---
+  - platform: homeassistant
+    id: st_porta
+    entity_id: !secret ent_portafinestra
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.label.update: { id: lbl_porta, text: "Aperta", text_color: 0xEF5350 }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC", text_color: 0xEF5350 }
+          else:
+            - lvgl.label.update: { id: lbl_porta, text: "Chiusa", text_color: 0x66BB6A }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB", text_color: 0x66BB6A }
 
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
@@ -1178,12 +1224,76 @@ lvgl:
       bg_color: 0x15171E
       bg_opa: COVER
       widgets:
-        - label:
-            align: CENTER
-            y: -30
-            text: "Irrigazione - Sensori"
-            text_font: montserrat_28
-            text_color: 0x9AA0B0
+        # ===== CUCINA ESTERNA =====
+        - label: { align: TOP_LEFT, x: 32, y: 8, text: "Cucina esterna", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - button:
+            id: btn_luce_cucina
+            align: TOP_MID
+            x: -242
+            y: 38
+            width: 460
+            height: 120
+            bg_color: 0x2A2D3A
+            radius: 14
+            widgets:
+              - label: { align: LEFT_MID, x: 28, text: "\U000F0335", text_font: font_mdi, text_color: 0xFFFFFF }
+              - label: { align: LEFT_MID, x: 92, text: "Luce esterna", text_font: montserrat_24, text_color: 0xFFFFFF }
+            on_click:
+              - homeassistant.service: { service: light.toggle, data: { entity_id: !secret ent_luce_cucina_est } }
+        - obj:
+            align: TOP_MID
+            x: 242
+            y: 38
+            width: 460
+            height: 120
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label: { align: LEFT_MID, x: 28, text: "\U000F0241", text_font: font_mdi, text_color: 0xFFD54F }
+              - label: { align: TOP_LEFT, x: 92, y: 36, text: "Consumo cucina", text_font: montserrat_18, text_color: 0x9AA0B0 }
+              - label: { id: lbl_g_consumo, align: BOTTOM_LEFT, x: 92, y: -34, text: "-- W", text_font: montserrat_28, text_color: 0xFFFFFF }
+        # ===== GIARDINO =====
+        - label: { align: TOP_LEFT, x: 32, y: 178, text: "Giardino", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        - obj:
+            align: TOP_MID
+            x: -340
+            y: 208
+            width: 300
+            height: 150
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label: { align: TOP_MID, y: 16, text: "\U000F050F", text_font: font_mdi, text_color: 0x66BB6A }
+              - label: { align: TOP_MID, y: 66, text: "Temperatura", text_font: montserrat_16, text_color: 0x9AA0B0 }
+              - label: { id: lbl_g_temp, align: BOTTOM_MID, y: -16, text: "--", text_font: font_temp, text_color: 0xFFFFFF }
+        - obj:
+            align: TOP_MID
+            x: 0
+            y: 208
+            width: 300
+            height: 150
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label: { align: TOP_MID, y: 16, text: "\U000F058E", text_font: font_mdi, text_color: 0x29B6F6 }
+              - label: { align: TOP_MID, y: 66, text: "Umidita", text_font: montserrat_16, text_color: 0x9AA0B0 }
+              - label: { id: lbl_g_um, align: BOTTOM_MID, y: -16, text: "--", text_font: montserrat_28, text_color: 0xFFFFFF }
+        - obj:
+            align: TOP_MID
+            x: 340
+            y: 208
+            width: 300
+            height: 150
+            bg_color: 0x1E2230
+            radius: 14
+            border_width: 0
+            widgets:
+              - label: { id: lbl_porta_icon, align: TOP_MID, y: 14, text: "\U000F11DB", text_font: font_mdi, text_color: 0x66BB6A }
+              - label: { align: TOP_MID, y: 66, text: "Portafinestra", text_font: montserrat_16, text_color: 0x9AA0B0 }
+              - label: { id: lbl_porta, align: BOTTOM_MID, y: -16, text: "--", text_font: montserrat_24, text_color: 0xFFFFFF }
         - obj:
             align: BOTTOM_MID
             width: 1024
