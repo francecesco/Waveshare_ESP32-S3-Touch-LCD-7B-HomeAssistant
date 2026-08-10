@@ -100,11 +100,14 @@ Il componente espone un'API per i pin di output e il PWM del backlight, e un
 
 ## Roadmap
 
+Dettaglio completo in [ROADMAP.md](ROADMAP.md). In sintesi:
+
 - [x] Display, touch, UI a pagine, Home con dati live HA (gauge temperatura/umidità, potenza, bolletta, presenza persone)
 - [x] Controllo pagine da HA (entità `select`)
 - [x] Pagina **Energia**: tile con icone (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 - [x] Navbar con pulsante della pagina attiva evidenziato
 - [x] Pagina **Casa**: routine (script), controlli cucina (switch), robot aspirapolvere, tapparelle
 - [x] Pagina **Giardino**: luce e consumo cucina esterna, temperatura/umidità giardino, portafinestra
+- [ ] **Restyling UI**: interfaccia più moderna e accattivante sfruttando stili, temi e animazioni LVGL
 - [ ] **Gestione accensione display**: accensione al tocco, spegnimento del backlight dopo 30 s di inutilizzo
 - [ ] (opzionale) icone anche sulla Home, sincronizzazione inversa del select pagina
