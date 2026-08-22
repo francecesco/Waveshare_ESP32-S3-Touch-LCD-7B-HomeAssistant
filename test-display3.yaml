@@ -129,6 +129,11 @@ font:
     size: 30
     bpp: 4
     glyphs: "0123456789.,:-+ °€%kWhVA"
+  - file: "gfonts://Poppins@500"
+    id: f_44
+    size: 44
+    bpp: 4
+    glyphs: "0123456789.,:-+ °€%kWhVA"
   # Taglie "testuali": Latin Core, che include gli accenti italiani.
   - file: "gfonts://Poppins@400"
     id: f_24
@@ -595,10 +600,10 @@ lvgl:
       pad_all: 0
     - id: st_label
       text_color: 0x848D9C
-      text_font: f_16
+      text_font: f_20
     - id: st_value
       text_color: 0xE6EAF0
-      text_font: f_30
+      text_font: f_44
     - id: st_caption
       text_color: 0x848D9C
       text_font: f_14
@@ -739,7 +744,7 @@ lvgl:
                   id: lbl_t_g
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -773,7 +778,7 @@ lvgl:
                   id: lbl_t_s
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -807,7 +812,7 @@ lvgl:
                   id: lbl_t_c
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         # Riga 2: umidita'
@@ -842,7 +847,7 @@ lvgl:
                   id: lbl_um_g
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -876,7 +881,7 @@ lvgl:
                   id: lbl_um_s
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -910,7 +915,7 @@ lvgl:
                   id: lbl_um_c
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         # Riga 3: potenza, bolletta, persone
@@ -945,7 +950,7 @@ lvgl:
                   id: lbl_pot
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -979,7 +984,7 @@ lvgl:
                   id: lbl_bol
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
