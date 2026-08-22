@@ -273,6 +273,9 @@ sensor:
       - lvgl.label.update:
           id: lbl_g_temp
           text: !lambda 'return str_sprintf("%.1f°", x);'
+      - lvgl.label.update:
+          id: lbl_ext
+          text: !lambda 'return str_sprintf("%.1f°", x);'
   - platform: homeassistant
     id: temp_sala
     entity_id: !secret ent_temp_sala
@@ -282,6 +285,9 @@ sensor:
           value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_t_s
+          text: !lambda 'return str_sprintf("%.1f°", x);'
+      - lvgl.label.update:
+          id: lbl_int
           text: !lambda 'return str_sprintf("%.1f°", x);'
   - platform: homeassistant
     id: temp_camera
@@ -358,15 +364,6 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return str_sprintf("%.0f kWh",
                 v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
-  # --- Meteo: temperatura esterna (attributo dell'entita' weather.*) ---
-  - platform: homeassistant
-    id: meteo_temp
-    entity_id: !secret ent_meteo
-    attribute: temperature
-    on_value:
-      - lvgl.label.update:
-          id: lbl_meteo_temp
-          text: !lambda 'return str_sprintf("%.0f°", x);'
   # --- Giardino: consumo cucina esterna ---
   - platform: homeassistant
     id: consumo_cucina
@@ -641,46 +638,95 @@ lvgl:
       border_opa: COVER
       text_color: 0xE6EAF0
       text_font: f_20
+  top_layer:
+    widgets:
+      - label:
+          id: lbl_clock
+          align: TOP_LEFT
+          x: 24
+          y: 6
+          text: "--:--"
+          text_font: f_40
+          text_color: 0xE6EAF0
+      - label:
+          id: lbl_date
+          align: TOP_LEFT
+          x: 26
+          y: 54
+          text: "sincronizzazione..."
+          styles: [st_caption]
+      - label:
+          id: lbl_meteo_icon
+          align: TOP_LEFT
+          x: 190
+          y: 18
+          text: "\U000F0590"
+          text_font: font_mdi
+          text_color: 0x848D9C
+      - obj:
+          styles: [st_pill]
+          align: TOP_MID
+          x: 0
+          y: 18
+          width: 200
+          height: 40
+          widgets:
+            - label:
+                id: lbl_page_name
+                align: CENTER
+                text: "Home"
+                text_font: f_20
+                text_color: 0xE6EAF0
+      - label:
+          id: lbl_ext
+          align: TOP_RIGHT
+          x: -150
+          y: 16
+          text: "--°"
+          text_font: f_20
+          text_color: 0xE6EAF0
+      - label:
+          align: TOP_RIGHT
+          x: -150
+          y: 44
+          text: "ESTERNO"
+          styles: [st_caption]
+      - label:
+          id: lbl_int
+          align: TOP_RIGHT
+          x: -24
+          y: 16
+          text: "--°"
+          text_font: f_20
+          text_color: 0xE6EAF0
+      - label:
+          align: TOP_RIGHT
+          x: -24
+          y: 44
+          text: "INTERNO"
+          styles: [st_caption]
+      - obj:
+          align: TOP_MID
+          x: 0
+          y: 76
+          width: 1024
+          height: 1
+          bg_color: 0x272E3A
+          bg_opa: COVER
+          border_width: 0
+          radius: 0
+          pad_all: 0
   pages:
     - id: page_home
       bg_color: 0x15171E
       bg_opa: COVER
+      on_load:
+        - lvgl.label.update:
+            id: lbl_page_name
+            text: "Home"
       widgets:
-        # ===== HEADER: ORA + DATA (sx) e PERSONE (dx) =====
-        - label:
-            id: lbl_clock
-            align: TOP_LEFT
-            x: 30
-            y: 8
-            text: "--:--"
-            text_font: montserrat_48
-            text_color: 0xFFFFFF
-        - label:
-            id: lbl_date
-            align: TOP_LEFT
-            x: 32
-            y: 66
-            text: "sincronizzazione..."
-            text_font: montserrat_20
-            text_color: 0x9AA0B0
-        # ===== METEO: icona condizione + temperatura, a fianco dell'orologio =====
-        # Fascia libera fra data/ora (finiscono a ~x230) e i riquadri persone (da x559).
-        - label:
-            id: lbl_meteo_icon
-            align: TOP_LEFT
-            x: 300
-            y: 14
-            text: "\U000F0590"
-            text_font: font_mdi
-            text_color: 0x9AA0B0
-        - label:
-            id: lbl_meteo_temp
-            align: TOP_LEFT
-            x: 352
-            y: 22
-            text: "--°"
-            text_font: font_temp
-            text_color: 0xFFFFFF
+        # ===== HEADER: ORA/DATA/METEO ora nel top_layer (Task 2 restyling) =====
+        # ===== PERSONE (dx) — nascosti sotto l'header globale, rinascono nel Task 4 =====
         - obj:
             align: TOP_RIGHT
             x: -250
@@ -1037,6 +1083,10 @@ lvgl:
     - id: page_casa
       bg_color: 0x15171E
       bg_opa: COVER
+      on_load:
+        - lvgl.label.update:
+            id: lbl_page_name
+            text: "Casa"
       widgets:
         # ===== ROUTINE (script) =====
         - label: { align: TOP_LEFT, x: 32, y: 8, text: "Routine", text_font: montserrat_20, text_color: 0x9AA0B0 }
@@ -1234,6 +1284,10 @@ lvgl:
     - id: page_energia
       bg_color: 0x15171E
       bg_opa: COVER
+      on_load:
+        - lvgl.label.update:
+            id: lbl_page_name
+            text: "Energia"
       widgets:
         # --- Riga 1: spesa elettrica (EUR) ---
         - obj:
@@ -1468,6 +1522,10 @@ lvgl:
     - id: page_giardino
       bg_color: 0x15171E
       bg_opa: COVER
+      on_load:
+        - lvgl.label.update:
+            id: lbl_page_name
+            text: "Giardino"
       widgets:
         # ===== CUCINA ESTERNA =====
         - label: { align: TOP_LEFT, x: 32, y: 8, text: "Cucina esterna", text_font: montserrat_20, text_color: 0x9AA0B0 }
