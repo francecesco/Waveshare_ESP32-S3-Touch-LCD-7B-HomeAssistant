@@ -206,9 +206,6 @@ sensor:
     id: um_giardino
     entity_id: !secret ent_um_giardino
     on_value:
-      - lvgl.arc.update:
-          id: arc_um_g
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_um_g
           text: !lambda 'return str_sprintf("%.0f%%", x);'
@@ -219,9 +216,6 @@ sensor:
     id: um_sala
     entity_id: !secret ent_um_sala
     on_value:
-      - lvgl.arc.update:
-          id: arc_um_s
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_um_s
           text: !lambda 'return str_sprintf("%.0f%%", x);'
@@ -229,9 +223,6 @@ sensor:
     id: um_camera
     entity_id: !secret ent_um_camera
     on_value:
-      - lvgl.arc.update:
-          id: arc_um_c
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_um_c
           text: !lambda 'return str_sprintf("%.0f%%", x);'
@@ -240,9 +231,6 @@ sensor:
     id: potenza
     entity_id: !secret ent_potenza
     on_value:
-      - lvgl.arc.update:
-          id: arc_pot
-          value: !lambda 'return (int)(x * 100);'
       - lvgl.label.update:
           id: lbl_pot
           text: !lambda 'return str_sprintf("%.2f", x);'
@@ -250,9 +238,6 @@ sensor:
     id: bolletta
     entity_id: !secret ent_bolletta
     on_value:
-      - lvgl.arc.update:
-          id: arc_bol
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_bol
           text: !lambda 'return str_sprintf("%.0f", x);'
@@ -264,9 +249,6 @@ sensor:
     id: temp_giardino
     entity_id: !secret ent_temp_giardino
     on_value:
-      - lvgl.arc.update:
-          id: arc_t_g
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_t_g
           text: !lambda 'return str_sprintf("%.1f°", x);'
@@ -280,9 +262,6 @@ sensor:
     id: temp_sala
     entity_id: !secret ent_temp_sala
     on_value:
-      - lvgl.arc.update:
-          id: arc_t_s
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_t_s
           text: !lambda 'return str_sprintf("%.1f°", x);'
@@ -293,9 +272,6 @@ sensor:
     id: temp_camera
     entity_id: !secret ent_temp_camera
     on_value:
-      - lvgl.arc.update:
-          id: arc_t_c
-          value: !lambda 'return x;'
       - lvgl.label.update:
           id: lbl_t_c
           text: !lambda 'return str_sprintf("%.1f°", x);'
@@ -382,6 +358,7 @@ text_sensor:
       - lvgl.label.update:
           id: lbl_fra
           text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+          text_color: !lambda 'return x == "home" ? lv_color_hex(0x8FBF9F) : lv_color_hex(0x848D9C);'
   - platform: homeassistant
     id: pers_2
     entity_id: !secret ent_persona2
@@ -389,6 +366,7 @@ text_sensor:
       - lvgl.label.update:
           id: lbl_cos
           text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+          text_color: !lambda 'return x == "home" ? lv_color_hex(0x8FBF9F) : lv_color_hex(0x848D9C);'
   # --- Meteo: condizione -> icona MDI e colore ---
   # I glifi sono scritti come universal-character-name C++ (\UXXXXXXXX):
   # qui siamo in un block scalar, YAML non interpreta gli escape, lo fa il compilatore.
@@ -725,290 +703,319 @@ lvgl:
             id: lbl_page_name
             text: "Home"
       widgets:
-        # ===== HEADER: ORA/DATA/METEO ora nel top_layer (Task 2 restyling) =====
-        # ===== PERSONE (dx) — nascosti sotto l'header globale, rinascono nel Task 4 =====
+        # ===== HEADER: ORA/DATA/METEO nel top_layer (Task 2 restyling) =====
+        # ===== GRIGLIA 3x3 DI TILE (Task 4 restyling) =====
+        # Riga 1: temperature
         - obj:
-            align: TOP_RIGHT
-            x: -250
-            y: 8
-            width: 215
-            height: 90
-            bg_color: 0x2A2D3A
-            radius: 12
-            border_width: 0
-            pad_all: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 84
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F050F"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
               - label:
-                  align: TOP_MID
-                  y: 10
-                  text: !secret nome_persona1
-                  text_font: montserrat_16
-                  text_color: 0xFFFFFF
-              - label:
-                  id: lbl_fra
-                  align: BOTTOM_MID
-                  y: -12
-                  text: "--"
-                  text_font: montserrat_18
-                  text_color: 0x66BB6A
-        - obj:
-            align: TOP_RIGHT
-            x: -25
-            y: 8
-            width: 215
-            height: 90
-            bg_color: 0x2A2D3A
-            radius: 12
-            border_width: 0
-            pad_all: 0
-            widgets:
-              - label:
-                  align: TOP_MID
-                  y: 10
-                  text: !secret nome_persona2
-                  text_font: montserrat_16
-                  text_color: 0xFFFFFF
-              - label:
-                  id: lbl_cos
-                  align: BOTTOM_MID
-                  y: -12
-                  text: "--"
-                  text_font: montserrat_18
-                  text_color: 0x66BB6A
-        # ===== FILA 1: TEMPERATURE (x3) + UMIDITA' (x3) =====
-        - arc:
-            id: arc_t_g
-            align: TOP_MID
-            x: -425
-            y: 105
-            width: 125
-            height: 125
-            min_value: -10
-            max_value: 50
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x66BB6A
-              arc_width: 10
-            widgets:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Giardino"
+                  styles: [st_label]
               - label:
                   id: lbl_t_g
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_temp
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: -425
-            y: 233
-            text: "Giardino"
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_t_s
-            align: TOP_MID
-            x: -255
-            y: 105
-            width: 125
-            height: 125
-            min_value: -10
-            max_value: 50
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x66BB6A
-              arc_width: 10
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 84
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F050F"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Sala"
+                  styles: [st_label]
               - label:
                   id: lbl_t_s
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_temp
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: -255
-            y: 233
-            text: "Sala"
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_t_c
-            align: TOP_MID
-            x: -85
-            y: 105
-            width: 125
-            height: 125
-            min_value: -10
-            max_value: 50
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x66BB6A
-              arc_width: 10
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 84
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F050F"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Camera"
+                  styles: [st_label]
               - label:
                   id: lbl_t_c
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_temp
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: -85
-            y: 233
-            text: "Camera"
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_um_g
-            align: TOP_MID
-            x: 85
-            y: 105
-            width: 125
-            height: 125
-            min_value: 0
-            max_value: 100
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x29B6F6
-              arc_width: 10
+                  styles: [st_value]
+        # Riga 2: umidita'
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 228
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F058E"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Um. Giardino"
+                  styles: [st_label]
               - label:
                   id: lbl_um_g
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: montserrat_28
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: 85
-            y: 233
-            text: "Um. Giard."
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_um_s
-            align: TOP_MID
-            x: 255
-            y: 105
-            width: 125
-            height: 125
-            min_value: 0
-            max_value: 100
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x29B6F6
-              arc_width: 10
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 228
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F058E"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Um. Sala"
+                  styles: [st_label]
               - label:
                   id: lbl_um_s
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: montserrat_28
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: 255
-            y: 233
-            text: "Um. Sala"
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_um_c
-            align: TOP_MID
-            x: 425
-            y: 105
-            width: 125
-            height: 125
-            min_value: 0
-            max_value: 100
-            value: 0
-            arc_width: 10
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0x29B6F6
-              arc_width: 10
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 228
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F058E"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Um. Camera"
+                  styles: [st_label]
               - label:
                   id: lbl_um_c
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: montserrat_28
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: 425
-            y: 233
-            text: "Um. Cam."
-            text_font: montserrat_16
-            text_color: 0x9AA0B0
-        # ===== FILA 2: POTENZA + BOLLETTA (grandi) =====
-        - arc:
-            id: arc_pot
-            align: TOP_MID
-            x: -245
-            y: 270
-            width: 165
-            height: 165
-            min_value: 0
-            max_value: 350
-            value: 0
-            arc_width: 14
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0xFFD54F
-              arc_width: 14
+                  styles: [st_value]
+        # Riga 3: potenza, bolletta, persone
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 372
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F140B"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Potenza kW"
+                  styles: [st_label]
               - label:
                   id: lbl_pot
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: montserrat_40
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: -245
-            y: 440
-            text: "Potenza kW"
-            text_font: montserrat_20
-            text_color: 0x9AA0B0
-        - arc:
-            id: arc_bol
-            align: TOP_MID
-            x: 245
-            y: 270
-            width: 165
-            height: 165
-            min_value: 22
-            max_value: 150
-            value: 22
-            arc_width: 14
-            arc_color: 0x2A2D3A
-            indicator:
-              arc_color: 0xAB47BC
-              arc_width: 14
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 372
+            width: 317
+            height: 128
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0114"
+                        text_font: font_mdi_24
+                        text_color: 0x9E8FC7
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Bolletta €"
+                  styles: [st_label]
               - label:
                   id: lbl_bol
-                  align: CENTER
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: montserrat_40
-                  text_color: 0xFFFFFF
-        - label:
-            align: TOP_MID
-            x: 245
-            y: 440
-            text: "Bolletta EUR"
-            text_font: montserrat_20
-            text_color: 0x9AA0B0
+                  styles: [st_value]
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 372
+            width: 317
+            height: 128
+            widgets:
+              - label:
+                  align: TOP_LEFT
+                  x: 0
+                  y: 8
+                  text: !secret nome_persona1
+                  styles: [st_label]
+              - label:
+                  id: lbl_fra
+                  align: TOP_RIGHT
+                  x: 0
+                  y: 8
+                  text: "--"
+                  text_font: f_16
+                  text_color: 0xE6EAF0
+              - label:
+                  align: TOP_LEFT
+                  x: 0
+                  y: 56
+                  text: !secret nome_persona2
+                  styles: [st_label]
+              - label:
+                  id: lbl_cos
+                  align: TOP_RIGHT
+                  x: 0
+                  y: 56
+                  text: "--"
+                  text_font: f_16
+                  text_color: 0xE6EAF0
         # Barra di navigazione (definita qui come anchor, riusata sulle altre pagine)
         - obj:
             align: BOTTOM_MID
