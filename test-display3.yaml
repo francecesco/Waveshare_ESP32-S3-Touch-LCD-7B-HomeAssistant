@@ -99,6 +99,23 @@ font:
       - "\U000F0241"  # flash (consumo cucina)
       - "\U000F11DC"  # window-open-variant (portafinestra aperta)
       - "\U000F11DB"  # window-closed-variant (portafinestra chiusa)
+      # --- meteo (stati weather.* di Home Assistant) ---
+      - "\U000F0599"  # weather-sunny (sunny)
+      # clear-night riusa il glifo weather-night gia' dichiarato sopra (Buonanotte)
+      - "\U000F0595"  # weather-partly-cloudy (partlycloudy)
+      - "\U000F0F31"  # weather-night-partly-cloudy
+      - "\U000F0590"  # weather-cloudy (cloudy / fallback)
+      - "\U000F0591"  # weather-fog (fog)
+      - "\U000F0592"  # weather-hail (hail)
+      - "\U000F0593"  # weather-lightning (lightning)
+      - "\U000F067E"  # weather-lightning-rainy
+      - "\U000F0596"  # weather-pouring (pouring)
+      - "\U000F0597"  # weather-rainy (rainy)
+      - "\U000F0598"  # weather-snowy (snowy)
+      - "\U000F067F"  # weather-snowy-rainy
+      - "\U000F059D"  # weather-windy (windy)
+      - "\U000F059E"  # weather-windy-variant
+      - "\U000F05D6"  # alert-circle-outline (exceptional)
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
@@ -259,6 +276,15 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return str_sprintf("%.0f kWh",
                 v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+  # --- Meteo: temperatura esterna (attributo dell'entita' weather.*) ---
+  - platform: homeassistant
+    id: meteo_temp
+    entity_id: !secret ent_meteo
+    attribute: temperature
+    on_value:
+      - lvgl.label.update:
+          id: lbl_meteo_temp
+          text: !lambda 'return str_sprintf("%.0f°", x);'
   # --- Giardino: consumo cucina esterna ---
   - platform: homeassistant
     id: consumo_cucina
@@ -284,6 +310,48 @@ text_sensor:
       - lvgl.label.update:
           id: lbl_cos
           text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
+  # --- Meteo: condizione -> icona MDI e colore ---
+  # I glifi sono scritti come universal-character-name C++ (\UXXXXXXXX):
+  # qui siamo in un block scalar, YAML non interpreta gli escape, lo fa il compilatore.
+  - platform: homeassistant
+    id: meteo_cond
+    entity_id: !secret ent_meteo
+    on_value:
+      - lvgl.label.update:
+          id: lbl_meteo_icon
+          text: !lambda |-
+            if (x == "sunny")           return std::string("\U000F0599");
+            if (x == "clear-night")     return std::string("\U000F0594");
+            if (x == "partlycloudy")    return std::string("\U000F0595");
+            if (x == "cloudy")          return std::string("\U000F0590");
+            if (x == "fog")             return std::string("\U000F0591");
+            if (x == "hail")            return std::string("\U000F0592");
+            if (x == "lightning")       return std::string("\U000F0593");
+            if (x == "lightning-rainy") return std::string("\U000F067E");
+            if (x == "pouring")         return std::string("\U000F0596");
+            if (x == "rainy")           return std::string("\U000F0597");
+            if (x == "snowy")           return std::string("\U000F0598");
+            if (x == "snowy-rainy")     return std::string("\U000F067F");
+            if (x == "windy")           return std::string("\U000F059D");
+            if (x == "windy-variant")   return std::string("\U000F059E");
+            if (x == "exceptional")     return std::string("\U000F05D6");
+            return std::string("\U000F0590");  // stato ignoto -> nuvoloso
+          text_color: !lambda |-
+            // sole ambra, notte indaco, pioggia/temporale blu, neve/nebbia chiaro,
+            // nuvole/vento grigio, exceptional rosso.
+            if (x == "sunny")           return lv_color_hex(0xFFD54F);
+            if (x == "clear-night")     return lv_color_hex(0x9FA8DA);
+            if (x == "partlycloudy")    return lv_color_hex(0xB0BEC5);
+            if (x == "fog")             return lv_color_hex(0xCFD8DC);
+            if (x == "hail")            return lv_color_hex(0xB3E5FC);
+            if (x == "snowy")           return lv_color_hex(0xE1F5FE);
+            if (x == "snowy-rainy")     return lv_color_hex(0xB3E5FC);
+            if (x == "rainy")           return lv_color_hex(0x4FC3F7);
+            if (x == "pouring")         return lv_color_hex(0x4FC3F7);
+            if (x == "lightning")       return lv_color_hex(0x4FC3F7);
+            if (x == "lightning-rainy") return lv_color_hex(0x4FC3F7);
+            if (x == "exceptional")     return lv_color_hex(0xEF5350);
+            return lv_color_hex(0x9AA0B0);
   # Stato robot aspirapolvere (pagina Casa)
   - platform: homeassistant
     id: st_vacuum
@@ -465,6 +533,24 @@ lvgl:
             text: "sincronizzazione..."
             text_font: montserrat_20
             text_color: 0x9AA0B0
+        # ===== METEO: icona condizione + temperatura, a fianco dell'orologio =====
+        # Fascia libera fra data/ora (finiscono a ~x230) e i riquadri persone (da x559).
+        - label:
+            id: lbl_meteo_icon
+            align: TOP_LEFT
+            x: 300
+            y: 14
+            text: "\U000F0590"
+            text_font: font_mdi
+            text_color: 0x9AA0B0
+        - label:
+            id: lbl_meteo_temp
+            align: TOP_LEFT
+            x: 352
+            y: 22
+            text: "--°"
+            text_font: font_temp
+            text_color: 0xFFFFFF
         - obj:
             align: TOP_RIGHT
             x: -250

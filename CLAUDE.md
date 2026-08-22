@@ -172,7 +172,7 @@ Gli `entity_id` reali stanno in `secrets.yaml` (non versionato), riferiti nel YA
 - **Umidità**: `ent_um_giardino`, `ent_um_sala`, `ent_um_camera` (gauge 0–100 %)
 - **Temperature**: `ent_temp_giardino`, `ent_temp_sala`, `ent_temp_camera` (gauge −10..50 °C)
 - **Energia**: `ent_potenza` (potenza attuale, kW, 0–3.5), `ent_bolletta` (bolletta mese, 22–150)
-- **Meteo**: `ent_meteo` (entità `weather.*`) — **definita in `secrets.yaml` ma non ancora usata nel YAML**
+- **Meteo**: `ent_meteo` (entità `weather.*`) — usata due volte sulla Home: come `text_sensor` (lo **stato** → glifo MDI + colore dell'icona) e come `sensor` con `attribute: temperature` (→ label `24°`)
 - **Tesla (mese)**: `ent_tesla_costo` (€) e `ent_tesla_kwh_f1/f2/f3` — in HA non esiste un totale mensile, i kWh si **sommano per fascia** in un lambda (le fasce non ancora ricevute sono NaN → contate 0)
 - **Persone**: `ent_persona1`, `ent_persona2` + nomi visualizzati `nome_persona1`, `nome_persona2`
 
