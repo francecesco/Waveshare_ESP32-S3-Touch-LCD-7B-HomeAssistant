@@ -1444,182 +1444,213 @@ lvgl:
             id: lbl_page_name
             text: "Energia"
       widgets:
-        # --- Riga 1: spesa elettrica (EUR) ---
+        # ===== GRIGLIA 3x2 DI TILE (Task 6 restyling) =====
+        # Riga 1: spesa oggi, previsione mese, mese scorso
         - obj:
-            align: TOP_MID
-            x: -340
-            y: 62
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 84
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0114"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F0114"
-                  text_font: font_mdi
-                  text_color: 0xFFD54F
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Spesa oggi"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_oggi
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0xFFD54F
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: 0
-            y: 62
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 84
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F1A91"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F1A91"
-                  text_font: font_mdi
-                  text_color: 0xFFB74D
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Previsione mese"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_previsione
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0xFFB74D
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: 340
-            y: 62
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 84
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F02DA"
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F02DA"
-                  text_font: font_mdi
-                  text_color: 0xB0BEC5
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Mese scorso"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_prec
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0xB0BEC5
-        # --- Riga 2: consumo + Tesla ---
+                  styles: [st_value]
+        # Riga 2: consumo mese, Tesla €, Tesla kWh
         - obj:
-            align: TOP_MID
-            x: -340
-            y: 248
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 300
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F140B"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F140B"
-                  text_font: font_mdi
-                  text_color: 0x4FC3F7
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Consumo mese"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_consumo
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0x4FC3F7
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: 0
-            y: 248
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 300
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0B6C"
+                        text_font: font_mdi_24
+                        text_color: 0x9E8FC7
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F0B6C"
-                  text_font: font_mdi
-                  text_color: 0xEF5350
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Tesla mese"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_tesla_eur
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0xEF5350
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: 340
-            y: 248
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 300
+            width: 317
+            height: 200
             widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0B6C"
+                        text_font: font_mdi_24
+                        text_color: 0x9E8FC7
               - label:
-                  align: TOP_MID
-                  y: 12
-                  text: "\U000F0B6C"
-                  text_font: font_mdi
-                  text_color: 0xFF8A65
-              - label:
-                  align: TOP_MID
-                  y: 66
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
                   text: "Tesla kWh mese"
-                  text_font: montserrat_16
-                  text_color: 0x9AA0B0
+                  styles: [st_label]
               - label:
                   id: lbl_e_tesla_kwh
-                  align: BOTTOM_MID
-                  y: -16
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
                   text: "--"
-                  text_font: font_euro
-                  text_color: 0xFF8A65
+                  styles: [st_value]
         - obj:
             align: BOTTOM_MID
             width: 1024
