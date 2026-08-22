@@ -224,12 +224,41 @@ sensor:
           id: lbl_e_tesla_eur
           text: !lambda 'return str_sprintf("%.2f €", x);'
   - platform: homeassistant
-    id: tesla_kwh
-    entity_id: !secret ent_tesla_kwh
+    id: tesla_kwh_f1
+    entity_id: !secret ent_tesla_kwh_f1
     on_value:
       - lvgl.label.update:
           id: lbl_e_tesla_kwh
-          text: !lambda 'return str_sprintf("%.0f kWh", x);'
+          text: !lambda |-
+            // In HA non esiste piu' un totale mensile: si somma per fascia.
+            // Le fasce non ancora ricevute sono NaN -> valgono 0.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return str_sprintf("%.0f kWh",
+                v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+  - platform: homeassistant
+    id: tesla_kwh_f2
+    entity_id: !secret ent_tesla_kwh_f2
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_tesla_kwh
+          text: !lambda |-
+            // In HA non esiste piu' un totale mensile: si somma per fascia.
+            // Le fasce non ancora ricevute sono NaN -> valgono 0.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return str_sprintf("%.0f kWh",
+                v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+  - platform: homeassistant
+    id: tesla_kwh_f3
+    entity_id: !secret ent_tesla_kwh_f3
+    on_value:
+      - lvgl.label.update:
+          id: lbl_e_tesla_kwh
+          text: !lambda |-
+            // In HA non esiste piu' un totale mensile: si somma per fascia.
+            // Le fasce non ancora ricevute sono NaN -> valgono 0.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return str_sprintf("%.0f kWh",
+                v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
   # --- Giardino: consumo cucina esterna ---
   - platform: homeassistant
     id: consumo_cucina

@@ -50,6 +50,16 @@ I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → l
 - **Simboli `°` e `€`**: non presenti nei font LVGL di default → font custom via `gfonts://Montserrat` con `glyphs` mirati (`font_temp` per °, `font_euro` per €/kWh).
 - I valori dei sensori si aggiornano con `on_value` → `lvgl.label.update` (mai `interval` grezzo).
 
+### Entità HA rinominate = valori fermi a `--`, in totale silenzio
+Se un `entity_id` sottoscritto non esiste più in HA (rinominato, integrazione sostituita), ESPHome **non logga alcun errore**: si sottoscrive e non riceve mai uno stato, quindi la label LVGL resta al placeholder. Nei log si vedono solo i `Got state` delle entità *vive*, e l'assenza di una riga non distingue "entità morta" da "valore non ancora cambiato".
+- **Diagnosi rapida** — confrontare gli entity_id del firmware con la verità di HA via API REST (serve un long-lived token):
+  ```bash
+  curl -s -H "Authorization: Bearer $TOKEN" http://homeassistant.local:8123/api/states > states.json
+  # poi incrociare con le chiavi ent_* di secrets.yaml
+  ```
+  L'elenco degli entity_id realmente compilati nel firmware in esecuzione si legge nel dump di boot: `esphome logs ... | grep "Entity ID:"`.
+- Dopo aver cambiato entità in HA, ricontrollare **tutte** le chiavi `ent_*`, non solo quella che si è notata a schermo.
+
 ### Home Assistant: ricaricare l'integrazione dopo ogni flash
 I sensori `platform: homeassistant` restano **vuoti** finché non si ricarica l'integrazione ESPHome in HA dopo un flash (il subscribe degli stati non si ristabilisce da solo). Le entità esposte possono sparire allo stesso modo. Inoltre: le `Connection reset by peer` viste con `esphome logs` mentre HA è connesso sono il client di log che compete — NON instabilità reale.
 
@@ -162,7 +172,8 @@ Gli `entity_id` reali stanno in `secrets.yaml` (non versionato), riferiti nel YA
 - **Umidità**: `ent_um_giardino`, `ent_um_sala`, `ent_um_camera` (gauge 0–100 %)
 - **Temperature**: `ent_temp_giardino`, `ent_temp_sala`, `ent_temp_camera` (gauge −10..50 °C)
 - **Energia**: `ent_potenza` (potenza attuale, kW, 0–3.5), `ent_bolletta` (bolletta mese, 22–150)
-- **Meteo**: `ent_meteo` (entità `weather.*`, attributo `temperature` per la temp esterna)
+- **Meteo**: `ent_meteo` (entità `weather.*`) — **definita in `secrets.yaml` ma non ancora usata nel YAML**
+- **Tesla (mese)**: `ent_tesla_costo` (€) e `ent_tesla_kwh_f1/f2/f3` — in HA non esiste un totale mensile, i kWh si **sommano per fascia** in un lambda (le fasce non ancora ricevute sono NaN → contate 0)
 - **Persone**: `ent_persona1`, `ent_persona2` + nomi visualizzati `nome_persona1`, `nome_persona2`
 
 Vedi `secrets.yaml.example` per il modello da compilare.
