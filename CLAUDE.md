@@ -47,7 +47,13 @@ I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → l
 
 ### Icone e font speciali
 - **Icone Material Design**: font `font_mdi` scaricato in build (`type: web`, url del webfont Templarian/MaterialDesign-Webfont), glyphs per **codepoint** `"\U000Fxxxx"` (no supporto nativo `mdi:`). Verificare i codepoint su pictogrammers.com. Una label = un solo font.
-- **Simboli `°` e `€`**: non presenti nei font LVGL di default → font custom via `gfonts://Montserrat` con `glyphs` mirati (`font_temp` per °, `font_euro` per €/kWh).
+- **Tipografia Poppins via `gfonts://`**, ritagliata per taglia. Le taglie testuali (`f_24 f_20 f_16 f_14`) usano `glyphsets: [GF_Latin_Core]`, che copre anche gli accenti italiani (`ì à è é ò ù`); le taglie numeriche (`f_44`, `f_40`), che disegnano solo cifre/orologio, usano invece una lista `glyphs` esplicita.
+- **Il glyphset di default `GF_Latin_Kernel` ha `°` e `€` ma non gli accenti italiani.** Serve `GF_Latin_Core` per quelli, ma sono 319 glifi: applicarlo indiscriminatamente a tutte le taglie costerebbe ~367 KB invece di ~145 KB, da cui la divisione fra taglie testuali (Latin Core) e numeriche (glyphs mirati).
+- **I font builtin di LVGL (`montserrat_XX`) non sono gratuiti**: ogni taglia usata viene compilata con l'intero charset (`montserrat_48` da solo pesava ~95 KB). Sostituendoli con Poppins ritagliata sui soli glifi disegnati, il firmware è **sceso** dal 16.6% al 14.9% di flash pur aggiungendo sei taglie tipografiche e sedici icone meteo — nel progetto non compare più alcun `montserrat_*`.
+- **Serve un secondo font MDI a 24 px** (`font_mdi_24`) oltre a `font_mdi` (40 px), perché quest'ultimo non entra nel chip icona da 44×44; occhio a non disallineare le due liste di glifi (rischio duplicati).
+- **Gli stili condivisi stanno in `lvgl: style_definitions:`** e si applicano ai widget con `styles: [nome]` — è quanto ha reso l'ingrandimento dei caratteri una modifica di due righe invece che di venti tile.
+- **L'header (ora/data/meteo/temperature) sta nel `top_layer`**: è sicuro perché non ha widget interattivi (l'avvertenza nota sul `top_layer` riguarda solo il touch), ed è l'unica sede possibile perché gli id LVGL sono unici e queste label non possono esistere in quattro copie (una per pagina).
+- **`text_color` accetta un lambda** purché restituisca un `lv_color_t` (es. `lv_color_hex(...)`), utile per colorare dinamicamente senza catene di `if`.
 - I valori dei sensori si aggiornano con `on_value` → `lvgl.label.update` (mai `interval` grezzo).
 
 ### Entità HA rinominate = valori fermi a `--`, in totale silenzio

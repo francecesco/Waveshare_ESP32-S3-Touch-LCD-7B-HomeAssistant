@@ -59,16 +59,8 @@ io_extension_ws:
   - id: io_ext
     i2c_id: bus_a
 
-# Font con simboli speciali (° per temperature, € per importi)
+# Font: icone MDI (24/40 px) + tipografia Poppins ritagliata per taglia (vedi CLAUDE.md)
 font:
-  - file: "gfonts://Montserrat"
-    id: font_temp
-    size: 28
-    glyphs: "-.0123456789°"
-  - file: "gfonts://Montserrat"
-    id: font_euro
-    size: 30
-    glyphs: "-.,0123456789€kWh "
   # Icone Material Design (scaricate in build dal webfont MDI)
   - file:
       type: web
@@ -124,11 +116,6 @@ font:
     size: 40
     bpp: 4
     glyphs: "0123456789:.- "
-  - file: "gfonts://Poppins@500"
-    id: f_30
-    size: 30
-    bpp: 4
-    glyphs: "0123456789.,:-+ °€%kWhVA"
   - file: "gfonts://Poppins@500"
     id: f_44
     size: 44
