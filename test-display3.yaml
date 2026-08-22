@@ -1043,7 +1043,10 @@ lvgl:
                         align: CENTER
                         text: "Home"
                   on_click:
-                    - lvgl.page.show: page_home
+                    - lvgl.page.show:
+                        id: page_home
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1055,7 +1058,10 @@ lvgl:
                         align: CENTER
                         text: "Casa"
                   on_click:
-                    - lvgl.page.show: page_casa
+                    - lvgl.page.show:
+                        id: page_casa
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1067,7 +1073,10 @@ lvgl:
                         align: CENTER
                         text: "Energia"
                   on_click:
-                    - lvgl.page.show: page_energia
+                    - lvgl.page.show:
+                        id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1079,7 +1088,10 @@ lvgl:
                         align: CENTER
                         text: "Giardino"
                   on_click:
-                    - lvgl.page.show: page_giardino
+                    - lvgl.page.show:
+                        id: page_giardino
+                        animation: FADE_IN
+                        time: 150ms
     - id: page_casa
       bg_color: 0x15171E
       bg_opa: COVER
@@ -1404,7 +1416,10 @@ lvgl:
                         align: CENTER
                         text: "Home"
                   on_click:
-                    - lvgl.page.show: page_home
+                    - lvgl.page.show:
+                        id: page_home
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav_active]
                   align: LEFT_MID
@@ -1416,7 +1431,10 @@ lvgl:
                         align: CENTER
                         text: "Casa"
                   on_click:
-                    - lvgl.page.show: page_casa
+                    - lvgl.page.show:
+                        id: page_casa
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1428,7 +1446,10 @@ lvgl:
                         align: CENTER
                         text: "Energia"
                   on_click:
-                    - lvgl.page.show: page_energia
+                    - lvgl.page.show:
+                        id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1440,7 +1461,10 @@ lvgl:
                         align: CENTER
                         text: "Giardino"
                   on_click:
-                    - lvgl.page.show: page_giardino
+                    - lvgl.page.show:
+                        id: page_giardino
+                        animation: FADE_IN
+                        time: 150ms
     - id: page_energia
       bg_color: 0x15171E
       bg_opa: COVER
@@ -1677,7 +1701,10 @@ lvgl:
                         align: CENTER
                         text: "Home"
                   on_click:
-                    - lvgl.page.show: page_home
+                    - lvgl.page.show:
+                        id: page_home
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1689,7 +1716,10 @@ lvgl:
                         align: CENTER
                         text: "Casa"
                   on_click:
-                    - lvgl.page.show: page_casa
+                    - lvgl.page.show:
+                        id: page_casa
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav_active]
                   align: LEFT_MID
@@ -1701,7 +1731,10 @@ lvgl:
                         align: CENTER
                         text: "Energia"
                   on_click:
-                    - lvgl.page.show: page_energia
+                    - lvgl.page.show:
+                        id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1713,7 +1746,10 @@ lvgl:
                         align: CENTER
                         text: "Giardino"
                   on_click:
-                    - lvgl.page.show: page_giardino
+                    - lvgl.page.show:
+                        id: page_giardino
+                        animation: FADE_IN
+                        time: 150ms
     - id: page_giardino
       bg_color: 0x15171E
       bg_opa: COVER
@@ -1916,7 +1952,10 @@ lvgl:
                         align: CENTER
                         text: "Home"
                   on_click:
-                    - lvgl.page.show: page_home
+                    - lvgl.page.show:
+                        id: page_home
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1928,7 +1967,10 @@ lvgl:
                         align: CENTER
                         text: "Casa"
                   on_click:
-                    - lvgl.page.show: page_casa
+                    - lvgl.page.show:
+                        id: page_casa
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav]
                   align: LEFT_MID
@@ -1940,7 +1982,10 @@ lvgl:
                         align: CENTER
                         text: "Energia"
                   on_click:
-                    - lvgl.page.show: page_energia
+                    - lvgl.page.show:
+                        id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
               - button:
                   styles: [st_nav_active]
                   align: LEFT_MID
@@ -1952,7 +1997,10 @@ lvgl:
                         align: CENTER
                         text: "Giardino"
                   on_click:
-                    - lvgl.page.show: page_giardino
+                    - lvgl.page.show:
+                        id: page_giardino
+                        animation: FADE_IN
+                        time: 150ms
 
 # Select esposto a HA per cambiare pagina da automazioni
 # (es. action: select.select_option -> "Energia")
@@ -1972,22 +2020,34 @@ select:
           condition:
             lambda: 'return x == "Home";'
           then:
-            - lvgl.page.show: page_home
+            - lvgl.page.show:
+                id: page_home
+                animation: FADE_IN
+                time: 150ms
       - if:
           condition:
             lambda: 'return x == "Casa";'
           then:
-            - lvgl.page.show: page_casa
+            - lvgl.page.show:
+                id: page_casa
+                animation: FADE_IN
+                time: 150ms
       - if:
           condition:
             lambda: 'return x == "Energia";'
           then:
-            - lvgl.page.show: page_energia
+            - lvgl.page.show:
+                id: page_energia
+                animation: FADE_IN
+                time: 150ms
       - if:
           condition:
             lambda: 'return x == "Giardino";'
           then:
-            - lvgl.page.show: page_giardino
+            - lvgl.page.show:
+                id: page_giardino
+                animation: FADE_IN
+                time: 150ms
 
 button:
   - platform: template
