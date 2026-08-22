@@ -117,6 +117,88 @@ font:
       - "\U000F059E"  # weather-windy-variant
       - "\U000F05D6"  # alert-circle-outline (exceptional)
 
+  # --- Poppins: tipografia del restyling (vedi spec) ---
+  # Taglie "numeriche": lista glyphs esplicita, non serve tutto il Latin Core.
+  - file: "gfonts://Poppins@500"
+    id: f_40
+    size: 40
+    bpp: 4
+    glyphs: "0123456789:.- "
+  - file: "gfonts://Poppins@500"
+    id: f_30
+    size: 30
+    bpp: 4
+    glyphs: "0123456789.,:-+ °€%kWhVA"
+  # Taglie "testuali": Latin Core, che include gli accenti italiani.
+  - file: "gfonts://Poppins@400"
+    id: f_24
+    size: 24
+    bpp: 4
+    glyphsets: [GF_Latin_Core]
+  - file: "gfonts://Poppins@400"
+    id: f_20
+    size: 20
+    bpp: 4
+    glyphsets: [GF_Latin_Core]
+  - file: "gfonts://Poppins@400"
+    id: f_16
+    size: 16
+    bpp: 4
+    glyphsets: [GF_Latin_Core]
+  - file: "gfonts://Poppins@400"
+    id: f_14
+    size: 14
+    bpp: 4
+    glyphsets: [GF_Latin_Core]
+  # Font MDI a 24 px: font_mdi (40px) non entra nel chip icona da 44x44.
+  # Stessa identica lista di glifi di font_mdi (inclusi i 15 glifi meteo).
+  - file:
+      type: web
+      url: "https://github.com/Templarian/MaterialDesign-Webfont/raw/master/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_24
+    size: 24
+    bpp: 4
+    glyphs:
+      - "\U000F0114"  # cash (spesa oggi)
+      - "\U000F1A91"  # cash-clock (previsione mese)
+      - "\U000F02DA"  # history (mese scorso)
+      - "\U000F140B"  # lightning-bolt (consumo)
+      - "\U000F0B6C"  # car-electric (Tesla)
+      - "\U000F0A48"  # exit-run (Esco)
+      - "\U000F059C"  # weather-sunset-up (Buongiorno)
+      - "\U000F0594"  # weather-night (Buonanotte)
+      - "\U000F0176"  # coffee (Caffe)
+      - "\U000F05FA"  # kettle (Bollitore)
+      - "\U000F1099"  # air-humidifier (Deumidificatore)
+      - "\U000F070D"  # robot-vacuum (Igor)
+      - "\U000F111C"  # window-shutter (tapparelle)
+      - "\U000F0143"  # chevron-up (tapparelle su)
+      - "\U000F0140"  # chevron-down (tapparelle giu)
+      - "\U000F04DB"  # stop (tapparelle stop)
+      - "\U000F050F"  # thermometer (temp giardino)
+      - "\U000F058E"  # water-percent (umidita giardino)
+      - "\U000F0335"  # lightbulb (luce cucina esterna)
+      - "\U000F0241"  # flash (consumo cucina)
+      - "\U000F11DC"  # window-open-variant (portafinestra aperta)
+      - "\U000F11DB"  # window-closed-variant (portafinestra chiusa)
+      # --- meteo (stati weather.* di Home Assistant) ---
+      - "\U000F0599"  # weather-sunny (sunny)
+      # clear-night riusa il glifo weather-night gia' dichiarato sopra (Buonanotte)
+      - "\U000F0595"  # weather-partly-cloudy (partlycloudy)
+      - "\U000F0F31"  # weather-night-partly-cloudy
+      - "\U000F0590"  # weather-cloudy (cloudy / fallback)
+      - "\U000F0591"  # weather-fog (fog)
+      - "\U000F0592"  # weather-hail (hail)
+      - "\U000F0593"  # weather-lightning (lightning)
+      - "\U000F067E"  # weather-lightning-rainy
+      - "\U000F0596"  # weather-pouring (pouring)
+      - "\U000F0597"  # weather-rainy (rainy)
+      - "\U000F0598"  # weather-snowy (snowy)
+      - "\U000F067F"  # weather-snowy-rainy
+      - "\U000F059D"  # weather-windy (windy)
+      - "\U000F059E"  # weather-windy-variant
+      - "\U000F05D6"  # alert-circle-outline (exceptional)
+
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
   # --- Umidità (arc 0-100%) ---
@@ -511,6 +593,54 @@ lvgl:
     - lcd
   touchscreens:
     - my_touch
+  style_definitions:
+    - id: st_card
+      bg_color: 0x171C24
+      bg_opa: COVER
+      radius: 16
+      border_width: 1
+      border_color: 0x272E3A
+      border_opa: COVER
+      pad_all: 14
+    - id: st_chip
+      bg_color: 0x232935
+      bg_opa: COVER
+      radius: 12
+      border_width: 0
+      pad_all: 0
+    - id: st_pill
+      bg_color: 0x171C24
+      bg_opa: COVER
+      radius: 40
+      border_width: 1
+      border_color: 0x272E3A
+      border_opa: COVER
+      pad_all: 0
+    - id: st_label
+      text_color: 0x848D9C
+      text_font: f_16
+    - id: st_value
+      text_color: 0xE6EAF0
+      text_font: f_30
+    - id: st_caption
+      text_color: 0x848D9C
+      text_font: f_14
+    - id: st_nav
+      bg_color: 0x171C24
+      bg_opa: COVER
+      radius: 14
+      border_width: 0
+      text_color: 0x848D9C
+      text_font: f_20
+    - id: st_nav_active
+      bg_color: 0x232935
+      bg_opa: COVER
+      radius: 14
+      border_width: 1
+      border_color: 0x7FB3D5
+      border_opa: COVER
+      text_color: 0xE6EAF0
+      text_font: f_20
   pages:
     - id: page_home
       bg_color: 0x15171E
