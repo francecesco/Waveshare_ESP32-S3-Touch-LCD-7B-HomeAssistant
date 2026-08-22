@@ -435,9 +435,9 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.widget.update: { id: btn_caffe, bg_color: 0xFF7043 }
+            - lvgl.widget.update: { id: btn_caffe, bg_color: 0xE0908A }
           else:
-            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x2A2D3A }
+            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x171C24 }
   - platform: homeassistant
     id: st_bollitore
     entity_id: !secret ent_sw_bollitore
@@ -446,9 +446,9 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0xFF7043 }
+            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0xE0908A }
           else:
-            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x2A2D3A }
+            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x171C24 }
   - platform: homeassistant
     id: st_deum
     entity_id: !secret ent_sw_deum
@@ -457,9 +457,9 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.widget.update: { id: btn_deum, bg_color: 0x4FC3F7 }
+            - lvgl.widget.update: { id: btn_deum, bg_color: 0x7FB3D5 }
           else:
-            - lvgl.widget.update: { id: btn_deum, bg_color: 0x2A2D3A }
+            - lvgl.widget.update: { id: btn_deum, bg_color: 0x171C24 }
   # --- Giardino: luce cucina esterna (colore se accesa) ---
   - platform: homeassistant
     id: st_luce_cucina
@@ -1084,144 +1084,300 @@ lvgl:
             text: "Casa"
       widgets:
         # ===== ROUTINE (script) =====
-        - label: { align: TOP_LEFT, x: 32, y: 8, text: "Routine", text_font: montserrat_20, text_color: 0x9AA0B0 }
-        - button:
-            align: TOP_MID
-            x: -340
-            y: 38
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 84
+            width: 484
+            height: 200
             widgets:
-              - label: { align: LEFT_MID, x: 24, text: "\U000F0A48", text_font: font_mdi, text_color: 0x66BB6A }
-              - label: { align: LEFT_MID, x: 84, text: "Esco", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_esco } }
-        - button:
-            align: TOP_MID
-            x: 0
-            y: 38
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: LEFT_MID, x: 18, text: "\U000F059C", text_font: font_mdi, text_color: 0xFFB74D }
-              - label: { align: LEFT_MID, x: 78, text: "Buongiorno", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_buongiorno } }
-        - button:
-            align: TOP_MID
-            x: 340
-            y: 38
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: LEFT_MID, x: 18, text: "\U000F0594", text_font: font_mdi, text_color: 0x7986CB }
-              - label: { align: LEFT_MID, x: 78, text: "Buonanotte", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: script.turn_on, data: { entity_id: !secret ent_script_buonanotte } }
+              - label:
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  text: "Routine"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 44
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F0A48"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Esco"
+                  on_click:
+                    - homeassistant.service:
+                        service: script.turn_on
+                        data:
+                          entity_id: !secret ent_script_esco
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 90
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F059C"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Buongiorno"
+                  on_click:
+                    - homeassistant.service:
+                        service: script.turn_on
+                        data:
+                          entity_id: !secret ent_script_buongiorno
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 136
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F0594"
+                        text_font: font_mdi_24
+                        text_color: 0x9E8FC7
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Buonanotte"
+                  on_click:
+                    - homeassistant.service:
+                        service: script.turn_on
+                        data:
+                          entity_id: !secret ent_script_buonanotte
         # ===== CUCINA (switch toggle) =====
-        - label: { align: TOP_LEFT, x: 32, y: 146, text: "Cucina", text_font: montserrat_20, text_color: 0x9AA0B0 }
-        - button:
-            id: btn_caffe
-            align: TOP_MID
-            x: -340
-            y: 176
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 520
+            y: 84
+            width: 484
+            height: 200
             widgets:
-              - label: { align: LEFT_MID, x: 24, text: "\U000F0176", text_font: font_mdi, text_color: 0xFFFFFF }
-              - label: { align: LEFT_MID, x: 84, text: "Caffe", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_caffe } }
-        - button:
-            id: btn_bollitore
-            align: TOP_MID
-            x: 0
-            y: 176
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: LEFT_MID, x: 18, text: "\U000F05FA", text_font: font_mdi, text_color: 0xFFFFFF }
-              - label: { align: LEFT_MID, x: 78, text: "Bollitore", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_bollitore } }
-        - button:
-            id: btn_deum
-            align: TOP_MID
-            x: 340
-            y: 176
-            width: 300
-            height: 88
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: LEFT_MID, x: 24, text: "\U000F1099", text_font: font_mdi, text_color: 0xFFFFFF }
-              - label: { align: LEFT_MID, x: 84, text: "Deum.", text_font: montserrat_20, text_color: 0xFFFFFF }
-            on_click:
-              - homeassistant.service: { service: switch.toggle, data: { entity_id: !secret ent_sw_deum } }
+              - label:
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  text: "Cucina"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+              - button:
+                  id: btn_caffe
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 44
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F0176"
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Caffe"
+                  on_click:
+                    - homeassistant.service:
+                        service: switch.toggle
+                        data:
+                          entity_id: !secret ent_sw_caffe
+              - button:
+                  id: btn_bollitore
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 90
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F05FA"
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Bollitore"
+                  on_click:
+                    - homeassistant.service:
+                        service: switch.toggle
+                        data:
+                          entity_id: !secret ent_sw_bollitore
+              - button:
+                  id: btn_deum
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 136
+                  width: 456
+                  height: 34
+                  widgets:
+                    - label:
+                        align: LEFT_MID
+                        x: 12
+                        text: "\U000F1099"
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
+                    - label:
+                        align: LEFT_MID
+                        x: 48
+                        text: "Deum."
+                  on_click:
+                    - homeassistant.service:
+                        service: switch.toggle
+                        data:
+                          entity_id: !secret ent_sw_deum
         # ===== PULIZIE (vacuum) =====
-        - label: { align: TOP_LEFT, x: 32, y: 284, text: "Pulizie", text_font: montserrat_20, text_color: 0x9AA0B0 }
-        - button:
-            align: TOP_MID
-            x: -242
-            y: 314
-            width: 460
-            height: 96
-            bg_color: 0x2A2D3A
-            radius: 12
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 300
+            width: 484
+            height: 200
             widgets:
-              - label: { align: LEFT_MID, x: 26, text: "\U000F070D", text_font: font_mdi, text_color: 0x4FC3F7 }
-              - label: { align: LEFT_MID, x: 92, text: "Igor", text_font: montserrat_28, text_color: 0xFFFFFF }
-              - label: { id: lbl_igor, align: RIGHT_MID, x: -24, text: "--", text_font: montserrat_20, text_color: 0x9AA0B0 }
-            on_click:
-              - homeassistant.service: { service: vacuum.start, data: { entity_id: !secret ent_vacuum } }
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F070D"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 10
+                  text: "Igor"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+              - label:
+                  id: lbl_igor
+                  align: TOP_RIGHT
+                  x: 0
+                  y: 14
+                  text: "--"
+                  styles: [st_label]
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 64
+                  width: 456
+                  height: 96
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Avvia"
+                  on_click:
+                    - homeassistant.service:
+                        service: vacuum.start
+                        data:
+                          entity_id: !secret ent_vacuum
         # ===== TAPPARELLE (cover) =====
-        - label: { align: TOP_MID, x: 250, y: 284, text: "Tapparelle", text_font: montserrat_20, text_color: 0x9AA0B0 }
-        - button:
-            align: TOP_MID
-            x: 95
-            y: 314
-            width: 150
-            height: 96
-            bg_color: 0x2A2D3A
-            radius: 12
+        - obj:
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 520
+            y: 300
+            width: 484
+            height: 200
             widgets:
-              - label: { align: CENTER, text: "\U000F0143", text_font: font_mdi, text_color: 0x66BB6A }
-            on_click:
-              - homeassistant.service: { service: cover.open_cover, data: { entity_id: !secret ent_cover_tapparelle } }
-        - button:
-            align: TOP_MID
-            x: 255
-            y: 314
-            width: 150
-            height: 96
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: CENTER, text: "\U000F04DB", text_font: font_mdi, text_color: 0xEF5350 }
-            on_click:
-              - homeassistant.service: { service: cover.stop_cover, data: { entity_id: !secret ent_cover_tapparelle } }
-        - button:
-            align: TOP_MID
-            x: 415
-            y: 314
-            width: 150
-            height: 96
-            bg_color: 0x2A2D3A
-            radius: 12
-            widgets:
-              - label: { align: CENTER, text: "\U000F0140", text_font: font_mdi, text_color: 0xFFB74D }
-            on_click:
-              - homeassistant.service: { service: cover.close_cover, data: { entity_id: !secret ent_cover_tapparelle } }
+              - label:
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  text: "Tapparelle"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 100
+                  width: 144
+                  height: 60
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0143"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+                  on_click:
+                    - homeassistant.service:
+                        service: cover.open_cover
+                        data:
+                          entity_id: !secret ent_cover_tapparelle
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 156
+                  y: 100
+                  width: 144
+                  height: 60
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F04DB"
+                        text_font: font_mdi_24
+                        text_color: 0xD2645E
+                  on_click:
+                    - homeassistant.service:
+                        service: cover.stop_cover
+                        data:
+                          entity_id: !secret ent_cover_tapparelle
+              - button:
+                  styles: [st_nav]
+                  align: TOP_LEFT
+                  x: 312
+                  y: 100
+                  width: 144
+                  height: 60
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0140"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
+                  on_click:
+                    - homeassistant.service:
+                        service: cover.close_cover
+                        data:
+                          entity_id: !secret ent_cover_tapparelle
         - obj:
             align: BOTTOM_MID
             width: 1024
