@@ -750,8 +750,10 @@ riposo `0x848D9C`.
 "Igor", la label `lbl_igor` con lo stato allineata a destra, e sotto un pulsante a
 tutta larghezza "Avvia" che chiama `vacuum.start` su `!secret ent_vacuum`.
 
-**Card Tapparelle** (520, 300) — tre pulsanti affiancati da 148x60 a y 100,
-x 0 / 156 / 312, con la sola icona centrata:
+**Card Tapparelle** (520, 300) — tre pulsanti affiancati da **144**x60 a y 100,
+x 0 / 156 / 312, con la sola icona centrata. La larghezza interna della card e'
+456 (484 meno `pad_all: 14` per lato): 144x3 + 12x2 = 456 esatto. Con 148, come
+prescriveva la prima stesura, l'ultimo pulsante sforerebbe di 4 px.
 
 | icona | colore | servizio | entity_id |
 |---|---|---|---|
