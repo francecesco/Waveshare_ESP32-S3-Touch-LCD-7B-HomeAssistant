@@ -1059,3 +1059,89 @@ git commit -m "Restyling 9/9: rimossi i font orfani, documentazione aggiornata"
 - Ogni comando funziona: script, switch cucina, robot, tapparelle, luce esterna.
 - `grep -n "lvgl.arc.update\|font_temp\|font_euro" test-display3.yaml` non trova nulla fuori dalle dichiarazioni rimosse.
 - Nessun `[E]`/`[W]` nei log e nessun rollback OTA dopo l'ultimo flash.
+
+---
+
+## Task 10: Scala tipografica piu' grande (richiesta dall'utente in corso d'opera)
+
+Aggiunto dopo che l'utente, vedendo la Home a schermo, ha chiesto caratteri piu'
+grandi. Non e' un difetto: e' una taratura che si puo' fare solo guardando il
+pannello da lontano, ed e' il motivo per cui gli stili sono condivisi.
+
+**Files:**
+- Modify: `test-display3.yaml` — sezione `font:`, aggiungere `f_44`
+- Modify: `test-display3.yaml` — `style_definitions`, `st_label` e `st_value`
+
+**Interfaces:**
+- Consumes: gli stili del Task 1, le pagine dei Task 4/6/7
+- Produces: il font `f_44`
+
+**Perche' bastano due righe.** La dimensione dei caratteri non e' scritta nelle
+venti tile: e' in `st_label` (f_16) e `st_value` (f_30). Cambiando i due stili si
+aggiornano Home, Energia e Giardino insieme.
+
+**Conti sullo spazio, celle Home 317x128.** Con `pad_all: 14` l'interno e' 289x100,
+e il testo parte a x 58 perche' a sinistra c'e' il chip icona da 44: restano
+**231 px** di larghezza. In verticale oggi l'etichetta sta a y 2 e il valore a
+y 26, che a f_30 finisce a y 62 su 100 disponibili — quasi il 40% sprecato.
+
+- [ ] **Step 1: Aggiungere il font f_44**
+
+In coda ai Poppins, con lo stesso set di glifi numerici di `f_30` (non serve il
+Latin Core: questo font disegna solo valori):
+
+```yaml
+  - file: "gfonts://Poppins@500"
+    id: f_44
+    size: 44
+    bpp: 4
+    glyphs: "0123456789.,:-+ °€%kWhVA"
+```
+
+Costo atteso: ~14 KB.
+
+- [ ] **Step 2: Alzare i due stili**
+
+In `style_definitions`, cambiare **solo** la riga `text_font`:
+
+```yaml
+    - id: st_label
+      text_color: 0x848D9C
+      text_font: f_20      # era f_16
+    - id: st_value
+      text_color: 0xE6EAF0
+      text_font: f_44      # era f_30
+```
+
+- [ ] **Step 3: Riposizionare il valore nelle tile della Home**
+
+A f_44 il valore e' alto ~53 px. Lasciandolo a y 26 finirebbe a 79: entra, ma
+appiccicato all'etichetta, che a f_20 finisce a y 26. Spostare il valore a
+**y 30** in tutte e nove le celle della Home (finisce a 83, dentro i 100).
+Nelle celle di Energia e Giardino, alte 200, non serve toccare nulla.
+
+- [ ] **Step 4: Validare, compilare, flashare**
+
+```bash
+esphome config  test-display3.yaml | tail -3
+esphome compile test-display3.yaml 2>&1 | grep -E "Flash:|error"
+esphome upload  test-display3.yaml --device test-plancia.local
+```
+
+- [ ] **Step 5: Verifica visiva, e questa e' la sostanza del task**
+
+**Da chiedere all'utente**, guardando la plancia dalla distanza a cui la usa
+davvero:
+
+1. I valori si leggono meglio? Se ancora no, si sale a f_52: c'e' margine fino a
+   ~70 px di altezza prima di toccare il fondo della cella.
+2. **Le etichette lunghe sono tagliate?** I candidati sono "Um. Giardino" e
+   "Tesla kWh mese" nei 231 px disponibili. Se lo sono, l'etichetta torna a f_18
+   o f_16: e' il **valore** che deve leggersi da lontano, non l'etichetta.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add test-display3.yaml
+git commit -m "Restyling 10: scala tipografica piu' grande su richiesta"
+```
