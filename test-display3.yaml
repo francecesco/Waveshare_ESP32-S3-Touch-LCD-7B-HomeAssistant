@@ -469,9 +469,9 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0xFBC02D }
+            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0xD7A24C }
           else:
-            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x2A2D3A }
+            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x171C24 }
   # --- Giardino: portafinestra (icona + testo aperta/chiusa) ---
   - platform: homeassistant
     id: st_porta
@@ -481,11 +481,13 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.label.update: { id: lbl_porta, text: "Aperta", text_color: 0xEF5350 }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC", text_color: 0xEF5350 }
+            - lvgl.label.update: { id: lbl_porta, text: "Aperta" }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC" }
+            - lvgl.widget.update: { id: chip_porta, bg_color: 0xD2645E }
           else:
-            - lvgl.label.update: { id: lbl_porta, text: "Chiusa", text_color: 0x66BB6A }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB", text_color: 0x66BB6A }
+            - lvgl.label.update: { id: lbl_porta, text: "Chiusa" }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB" }
+            - lvgl.widget.update: { id: chip_porta, bg_color: 0x8FBF9F }
 
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
@@ -1717,76 +1719,180 @@ lvgl:
             id: lbl_page_name
             text: "Giardino"
       widgets:
-        # ===== CUCINA ESTERNA =====
-        - label: { align: TOP_LEFT, x: 32, y: 8, text: "Cucina esterna", text_font: montserrat_20, text_color: 0x9AA0B0 }
+        # ===== GRIGLIA 3+2 DI TILE (Task 7 restyling) =====
+        # Riga 1: luce esterna, consumo cucina, portafinestra
         - button:
             id: btn_luce_cucina
-            align: TOP_MID
-            x: -242
-            y: 38
-            width: 460
-            height: 120
-            bg_color: 0x2A2D3A
-            radius: 14
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 84
+            width: 317
+            height: 200
             widgets:
-              - label: { align: LEFT_MID, x: 28, text: "\U000F0335", text_font: font_mdi, text_color: 0xFFFFFF }
-              - label: { align: LEFT_MID, x: 92, text: "Luce esterna", text_font: montserrat_24, text_color: 0xFFFFFF }
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0335"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Luce esterna"
+                  styles: [st_label]
             on_click:
-              - homeassistant.service: { service: light.toggle, data: { entity_id: !secret ent_luce_cucina_est } }
+              - homeassistant.service:
+                  service: light.toggle
+                  data:
+                    entity_id: !secret ent_luce_cucina_est
         - obj:
-            align: TOP_MID
-            x: 242
-            y: 38
-            width: 460
-            height: 120
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 353
+            y: 84
+            width: 317
+            height: 200
             widgets:
-              - label: { align: LEFT_MID, x: 28, text: "\U000F0241", text_font: font_mdi, text_color: 0xFFD54F }
-              - label: { align: TOP_LEFT, x: 92, y: 36, text: "Consumo cucina", text_font: montserrat_18, text_color: 0x9AA0B0 }
-              - label: { id: lbl_g_consumo, align: BOTTOM_LEFT, x: 92, y: -34, text: "-- W", text_font: montserrat_28, text_color: 0xFFFFFF }
-        # ===== GIARDINO =====
-        - label: { align: TOP_LEFT, x: 32, y: 178, text: "Giardino", text_font: montserrat_20, text_color: 0x9AA0B0 }
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0241"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Consumo cucina"
+                  styles: [st_label]
+              - label:
+                  id: lbl_g_consumo
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
+                  text: "--"
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: -340
-            y: 208
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 686
+            y: 84
+            width: 317
+            height: 200
             widgets:
-              - label: { align: TOP_MID, y: 16, text: "\U000F050F", text_font: font_mdi, text_color: 0x66BB6A }
-              - label: { align: TOP_MID, y: 66, text: "Temperatura", text_font: montserrat_16, text_color: 0x9AA0B0 }
-              - label: { id: lbl_g_temp, align: BOTTOM_MID, y: -16, text: "--", text_font: font_temp, text_color: 0xFFFFFF }
+              - obj:
+                  id: chip_porta
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        id: lbl_porta_icon
+                        align: CENTER
+                        text: "\U000F11DB"
+                        text_font: font_mdi_24
+                        text_color: 0xE6EAF0
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Portafinestra"
+                  styles: [st_label]
+              - label:
+                  id: lbl_porta
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
+                  text: "--"
+                  styles: [st_value]
+        # Riga 2: temperatura, umidita
         - obj:
-            align: TOP_MID
-            x: 0
-            y: 208
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 20
+            y: 300
+            width: 484
+            height: 200
             widgets:
-              - label: { align: TOP_MID, y: 16, text: "\U000F058E", text_font: font_mdi, text_color: 0x29B6F6 }
-              - label: { align: TOP_MID, y: 66, text: "Umidita", text_font: montserrat_16, text_color: 0x9AA0B0 }
-              - label: { id: lbl_g_um, align: BOTTOM_MID, y: -16, text: "--", text_font: montserrat_28, text_color: 0xFFFFFF }
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F050F"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Temperatura"
+                  styles: [st_label]
+              - label:
+                  id: lbl_g_temp
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
+                  text: "--"
+                  styles: [st_value]
         - obj:
-            align: TOP_MID
-            x: 340
-            y: 208
-            width: 300
-            height: 180
-            bg_color: 0x1E2230
-            radius: 14
-            border_width: 0
+            styles: [st_card]
+            align: TOP_LEFT
+            x: 520
+            y: 300
+            width: 484
+            height: 200
             widgets:
-              - label: { id: lbl_porta_icon, align: TOP_MID, y: 14, text: "\U000F11DB", text_font: font_mdi, text_color: 0x66BB6A }
-              - label: { align: TOP_MID, y: 66, text: "Portafinestra", text_font: montserrat_16, text_color: 0x9AA0B0 }
-              - label: { id: lbl_porta, align: BOTTOM_MID, y: -16, text: "--", text_font: montserrat_24, text_color: 0xFFFFFF }
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F058E"
+                        text_font: font_mdi_24
+                        text_color: 0x7FB3D5
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 2
+                  text: "Umidita"
+                  styles: [st_label]
+              - label:
+                  id: lbl_g_um
+                  align: TOP_LEFT
+                  x: 58
+                  y: 26
+                  text: "--"
+                  styles: [st_value]
         - obj:
             align: BOTTOM_MID
             width: 1024
