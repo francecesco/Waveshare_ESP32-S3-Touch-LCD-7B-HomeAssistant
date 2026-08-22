@@ -193,7 +193,7 @@ font:
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
-  # --- Umidità (arc 0-100%) ---
+  # --- Umidità (tile Home + tile Giardino) ---
   - platform: homeassistant
     id: um_giardino
     entity_id: !secret ent_um_giardino
@@ -236,7 +236,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_previsione
           text: !lambda 'return str_sprintf("%.2f €", x);'
-  # --- Temperature (arc -10..50) ---
+  # --- Temperature (tile Home + header + tile Giardino) ---
   - platform: homeassistant
     id: temp_giardino
     entity_id: !secret ent_temp_giardino
@@ -386,21 +386,21 @@ text_sensor:
             if (x == "exceptional")     return std::string("\U000F05D6");
             return std::string("\U000F0590");  // stato ignoto -> nuvoloso
           text_color: !lambda |-
-            // sole ambra, notte indaco, pioggia/temporale blu, neve/nebbia chiaro,
-            // nuvole/vento grigio, exceptional rosso.
-            if (x == "sunny")           return lv_color_hex(0xFFD54F);
-            if (x == "clear-night")     return lv_color_hex(0x9FA8DA);
-            if (x == "partlycloudy")    return lv_color_hex(0xB0BEC5);
-            if (x == "fog")             return lv_color_hex(0xCFD8DC);
-            if (x == "hail")            return lv_color_hex(0xB3E5FC);
-            if (x == "snowy")           return lv_color_hex(0xE1F5FE);
-            if (x == "snowy-rainy")     return lv_color_hex(0xB3E5FC);
-            if (x == "rainy")           return lv_color_hex(0x4FC3F7);
-            if (x == "pouring")         return lv_color_hex(0x4FC3F7);
-            if (x == "lightning")       return lv_color_hex(0x4FC3F7);
-            if (x == "lightning-rainy") return lv_color_hex(0x4FC3F7);
-            if (x == "exceptional")     return lv_color_hex(0xEF5350);
-            return lv_color_hex(0x9AA0B0);
+            // Palette del restyling: sole ambra, notte viola, pioggia/temporale blu,
+            // neve/nebbia testo chiaro, nuvole/vento muted, exceptional rosso.
+            if (x == "sunny")           return lv_color_hex(0xD7A24C);
+            if (x == "clear-night")     return lv_color_hex(0x9E8FC7);
+            if (x == "partlycloudy")    return lv_color_hex(0x848D9C);
+            if (x == "fog")             return lv_color_hex(0xE6EAF0);
+            if (x == "hail")            return lv_color_hex(0xE6EAF0);
+            if (x == "snowy")           return lv_color_hex(0xE6EAF0);
+            if (x == "snowy-rainy")     return lv_color_hex(0xE6EAF0);
+            if (x == "rainy")           return lv_color_hex(0x7FB3D5);
+            if (x == "pouring")         return lv_color_hex(0x7FB3D5);
+            if (x == "lightning")       return lv_color_hex(0x7FB3D5);
+            if (x == "lightning-rainy") return lv_color_hex(0x7FB3D5);
+            if (x == "exceptional")     return lv_color_hex(0xD2645E);
+            return lv_color_hex(0x848D9C);
   # Stato robot aspirapolvere (pagina Casa)
   - platform: homeassistant
     id: st_vacuum
@@ -428,8 +428,12 @@ binary_sensor:
             lambda: 'return x;'
           then:
             - lvgl.widget.update: { id: btn_caffe, bg_color: 0xE0908A }
+            - lvgl.label.update: { id: lbl_btn_caffe, text_color: 0x0E1116 }
+            - lvgl.label.update: { id: ico_caffe, text_color: 0x0E1116 }
           else:
-            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x171C24 }
+            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x232935 }
+            - lvgl.label.update: { id: lbl_btn_caffe, text_color: 0xE6EAF0 }
+            - lvgl.label.update: { id: ico_caffe, text_color: 0x848D9C }
   - platform: homeassistant
     id: st_bollitore
     entity_id: !secret ent_sw_bollitore
@@ -439,8 +443,12 @@ binary_sensor:
             lambda: 'return x;'
           then:
             - lvgl.widget.update: { id: btn_bollitore, bg_color: 0xE0908A }
+            - lvgl.label.update: { id: lbl_btn_bollitore, text_color: 0x0E1116 }
+            - lvgl.label.update: { id: ico_bollitore, text_color: 0x0E1116 }
           else:
-            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x171C24 }
+            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x232935 }
+            - lvgl.label.update: { id: lbl_btn_bollitore, text_color: 0xE6EAF0 }
+            - lvgl.label.update: { id: ico_bollitore, text_color: 0x848D9C }
   - platform: homeassistant
     id: st_deum
     entity_id: !secret ent_sw_deum
@@ -450,8 +458,12 @@ binary_sensor:
             lambda: 'return x;'
           then:
             - lvgl.widget.update: { id: btn_deum, bg_color: 0x7FB3D5 }
+            - lvgl.label.update: { id: lbl_btn_deum, text_color: 0x0E1116 }
+            - lvgl.label.update: { id: ico_deum, text_color: 0x0E1116 }
           else:
-            - lvgl.widget.update: { id: btn_deum, bg_color: 0x171C24 }
+            - lvgl.widget.update: { id: btn_deum, bg_color: 0x232935 }
+            - lvgl.label.update: { id: lbl_btn_deum, text_color: 0xE6EAF0 }
+            - lvgl.label.update: { id: ico_deum, text_color: 0x848D9C }
   # --- Giardino: luce cucina esterna (colore se accesa) ---
   - platform: homeassistant
     id: st_luce_cucina
@@ -462,8 +474,10 @@ binary_sensor:
             lambda: 'return x;'
           then:
             - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0xD7A24C }
+            - lvgl.label.update: { id: lbl_btn_luce, text_color: 0x0E1116 }
           else:
-            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x171C24 }
+            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x232935 }
+            - lvgl.label.update: { id: lbl_btn_luce, text_color: 0xE6EAF0 }
   # --- Giardino: portafinestra (icona + testo aperta/chiusa) ---
   - platform: homeassistant
     id: st_porta
@@ -500,7 +514,7 @@ time:
               text: !lambda |-
                 auto t = id(ora).now();
                 if (!t.is_valid()) return std::string("");
-                static const char* gg[] = {"Domenica","Lunedi","Martedi","Mercoledi","Giovedi","Venerdi","Sabato"};
+                static const char* gg[] = {"Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"};
                 static const char* mm[] = {"gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"};
                 int dow = t.day_of_week, mo = t.month;
                 if (dow < 1 || dow > 7 || mo < 1 || mo > 12) return std::string("");
@@ -599,6 +613,17 @@ lvgl:
       border_width: 0
       text_color: 0x848D9C
       text_font: f_20
+    # Pulsanti dentro le card (pagina Casa): st_nav e' la navbar, sta su fascia
+    # 0x0B0D12; dentro una card 0x171C24 sarebbe invisibile. Qui si usa il chip.
+    - id: st_btn
+      bg_color: 0x232935
+      bg_opa: COVER
+      radius: 14
+      border_width: 1
+      border_color: 0x272E3A
+      border_opa: COVER
+      text_color: 0xE6EAF0
+      text_font: f_20
     - id: st_nav_active
       bg_color: 0x232935
       bg_opa: COVER
@@ -688,15 +713,15 @@ lvgl:
           pad_all: 0
   pages:
     - id: page_home
-      bg_color: 0x15171E
+      bg_color: 0x0E1116
       bg_opa: COVER
       on_load:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Home"
       widgets:
-        # ===== HEADER: ORA/DATA/METEO nel top_layer (Task 2 restyling) =====
-        # ===== GRIGLIA 3x3 DI TILE (Task 4 restyling) =====
+        # Ora / data / meteo / temperature stanno nel top_layer, condiviso da tutte le pagine.
+        # ===== GRIGLIA 3x3 DI TILE =====
         # Riga 1: temperature
         - obj:
             styles: [st_card]
@@ -1008,7 +1033,8 @@ lvgl:
                   text: "--"
                   text_font: f_16
                   text_color: 0xE6EAF0
-        # Barra di navigazione (definita qui come anchor, riusata sulle altre pagine)
+        # Barra di navigazione: duplicata inline in ogni pagina (gli anchor LVGL non
+        # si aggiornano, quindi ogni pagina ha la propria copia col tasto attivo)
         - obj:
             align: BOTTOM_MID
             width: 1024
@@ -1080,7 +1106,7 @@ lvgl:
                         animation: FADE_IN
                         time: 150ms
     - id: page_casa
-      bg_color: 0x15171E
+      bg_color: 0x0E1116
       bg_opa: COVER
       on_load:
         - lvgl.label.update:
@@ -1104,7 +1130,7 @@ lvgl:
                   text_font: f_24
                   text_color: 0xE6EAF0
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 44
@@ -1127,7 +1153,7 @@ lvgl:
                         data:
                           entity_id: !secret ent_script_esco
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 90
@@ -1150,7 +1176,7 @@ lvgl:
                         data:
                           entity_id: !secret ent_script_buongiorno
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 136
@@ -1190,7 +1216,7 @@ lvgl:
                   text_color: 0xE6EAF0
               - button:
                   id: btn_caffe
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 44
@@ -1198,15 +1224,17 @@ lvgl:
                   height: 34
                   widgets:
                     - label:
+                        id: ico_caffe
                         align: LEFT_MID
                         x: 12
                         text: "\U000F0176"
                         text_font: font_mdi_24
                         text_color: 0x848D9C
                     - label:
+                        id: lbl_btn_caffe
                         align: LEFT_MID
                         x: 48
-                        text: "Caffe"
+                        text: "Caffè"
                   on_click:
                     - homeassistant.service:
                         service: switch.toggle
@@ -1214,7 +1242,7 @@ lvgl:
                           entity_id: !secret ent_sw_caffe
               - button:
                   id: btn_bollitore
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 90
@@ -1222,12 +1250,14 @@ lvgl:
                   height: 34
                   widgets:
                     - label:
+                        id: ico_bollitore
                         align: LEFT_MID
                         x: 12
                         text: "\U000F05FA"
                         text_font: font_mdi_24
                         text_color: 0x848D9C
                     - label:
+                        id: lbl_btn_bollitore
                         align: LEFT_MID
                         x: 48
                         text: "Bollitore"
@@ -1238,7 +1268,7 @@ lvgl:
                           entity_id: !secret ent_sw_bollitore
               - button:
                   id: btn_deum
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 136
@@ -1246,12 +1276,14 @@ lvgl:
                   height: 34
                   widgets:
                     - label:
+                        id: ico_deum
                         align: LEFT_MID
                         x: 12
                         text: "\U000F1099"
                         text_font: font_mdi_24
                         text_color: 0x848D9C
                     - label:
+                        id: lbl_btn_deum
                         align: LEFT_MID
                         x: 48
                         text: "Deum."
@@ -1297,7 +1329,7 @@ lvgl:
                   text: "--"
                   styles: [st_label]
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 64
@@ -1329,7 +1361,7 @@ lvgl:
                   text_font: f_24
                   text_color: 0xE6EAF0
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 0
                   y: 100
@@ -1347,7 +1379,7 @@ lvgl:
                         data:
                           entity_id: !secret ent_cover_tapparelle
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 156
                   y: 100
@@ -1365,7 +1397,7 @@ lvgl:
                         data:
                           entity_id: !secret ent_cover_tapparelle
               - button:
-                  styles: [st_nav]
+                  styles: [st_btn]
                   align: TOP_LEFT
                   x: 312
                   y: 100
@@ -1453,14 +1485,14 @@ lvgl:
                         animation: FADE_IN
                         time: 150ms
     - id: page_energia
-      bg_color: 0x15171E
+      bg_color: 0x0E1116
       bg_opa: COVER
       on_load:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Energia"
       widgets:
-        # ===== GRIGLIA 3x2 DI TILE (Task 6 restyling) =====
+        # ===== GRIGLIA 3x2 DI TILE =====
         # Riga 1: spesa oggi, previsione mese, mese scorso
         - obj:
             styles: [st_card]
@@ -1493,7 +1525,7 @@ lvgl:
                   id: lbl_e_oggi
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1527,7 +1559,7 @@ lvgl:
                   id: lbl_e_previsione
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1561,7 +1593,7 @@ lvgl:
                   id: lbl_e_prec
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         # Riga 2: consumo mese, Tesla €, Tesla kWh
@@ -1596,7 +1628,7 @@ lvgl:
                   id: lbl_e_consumo
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1630,7 +1662,7 @@ lvgl:
                   id: lbl_e_tesla_eur
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1664,7 +1696,7 @@ lvgl:
                   id: lbl_e_tesla_kwh
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1738,14 +1770,14 @@ lvgl:
                         animation: FADE_IN
                         time: 150ms
     - id: page_giardino
-      bg_color: 0x15171E
+      bg_color: 0x0E1116
       bg_opa: COVER
       on_load:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Giardino"
       widgets:
-        # ===== GRIGLIA 3+2 DI TILE (Task 7 restyling) =====
+        # ===== GRIGLIA 3+2 DI TILE =====
         # Riga 1: luce esterna, consumo cucina, portafinestra
         - button:
             id: btn_luce_cucina
@@ -1770,6 +1802,7 @@ lvgl:
                         text_font: font_mdi_24
                         text_color: 0xD7A24C
               - label:
+                  id: lbl_btn_luce
                   align: TOP_LEFT
                   x: 58
                   y: 2
@@ -1811,7 +1844,7 @@ lvgl:
                   id: lbl_g_consumo
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1846,9 +1879,10 @@ lvgl:
                   id: lbl_porta
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
-                  styles: [st_value]
+                  text_font: f_24
+                  text_color: 0xE6EAF0
         # Riga 2: temperatura, umidita
         - obj:
             styles: [st_card]
@@ -1881,7 +1915,7 @@ lvgl:
                   id: lbl_g_temp
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1909,13 +1943,13 @@ lvgl:
                   align: TOP_LEFT
                   x: 58
                   y: 2
-                  text: "Umidita"
+                  text: "Umidità"
                   styles: [st_label]
               - label:
                   id: lbl_g_um
                   align: TOP_LEFT
                   x: 58
-                  y: 26
+                  y: 30
                   text: "--"
                   styles: [st_value]
         - obj:

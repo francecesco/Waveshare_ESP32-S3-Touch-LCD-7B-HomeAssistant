@@ -8,7 +8,7 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
 - [x] Pannello RGB 1024×600 con colori corretti e backlight stabile
 - [x] Touch capacitivo GT911 con reset hardware affidabile ad ogni boot
 - [x] UI LVGL a 4 pagine con barra di navigazione (pulsante pagina attiva evidenziato)
-- [x] **Home**: ora/data, meteo (icona condizione + temperatura esterna), gauge
+- [x] **Home**: ora/data, icona meteo, temperature esterna/interna nell'header, tile
       temperatura e umidità (×3 stanze), potenza, bolletta, presenza persone —
       tutti live da Home Assistant
 - [x] Controllo della pagina visualizzata da Home Assistant (entità `select`)

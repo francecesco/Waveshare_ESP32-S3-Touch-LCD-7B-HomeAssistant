@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Plancia di controllo/informativa da ingresso basata sul display **Waveshare ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), con ESPHome + LVGL e integrazione Home Assistant. UI a pagine: Home (orologio, meteo, temperature, stato Tesla), Casa, Energia, Giardino.
 
-**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio e **dati live da Home Assistant** funzionanti. Fase attuale: arricchire le pagine (gauge consumi, poi Casa/Energia/Giardino).
+**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Restano tre voci: spegnimento del backlight dopo 30 s, sync inversa del `select` pagina, IP statico — vedi [ROADMAP.md](ROADMAP.md).
 
 ## Comandi principali
 
@@ -40,16 +40,18 @@ Il registro PWM dell'IO expander a 247 è vicino alla **soglia di spegnimento** 
 Un `interval: 1s` con `lvgl.label.update` **crashava il boot** (→ safe mode). Usare il trigger `on_time` del componente time, oppure `on_value` dei sensori — contesti sicuri. Nei lambda con array (giorni/mesi) mettere guardie sugli indici.
 
 ### LVGL: il widget `chart` NON esiste in ESPHome
-Non c'è alcun widget `chart` né azioni `lvgl.chart.*` (e `LV_USE_CHART` è forzato a 0 in build con LVGL v9). Per i grafici: usare il widget **`meter`** (gauge/lancetta) — supportato — oppure il componente `graph` (ma disegna fuori da LVGL). I gauge sono anche fedeli alla dashboard HA che l'utente usava prima.
+Non c'è alcun widget `chart` né azioni `lvgl.chart.*` (e `LV_USE_CHART` è forzato a 0 in build con LVGL v9). Per i grafici: usare il widget **`meter`** (gauge/lancetta) — supportato — oppure il componente `graph` (ma disegna fuori da LVGL). Nota: **nel progetto non c'è più alcun gauge**, il restyling li ha sostituiti con tile piatte (icona + etichetta + valore numerico grande), più leggibili a distanza; non reintrodurli.
 
 ### Barra di navigazione: NON nel `top_layer`, e una per pagina
-I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → la navbar va **dentro ogni pagina**. Inoltre, per evidenziare il pulsante della pagina attiva (bg blu `0x2196F3` vs grigio `0x2A2D3A`) NON si può usare un anchor condiviso (i widget LVGL non si aggiornano via anchor, e gli id non possono duplicarsi): serve una **navbar inline per pagina**, ognuna col proprio pulsante evidenziato. Le pagine non hanno titolo in alto (lo stato è dato dal pulsante attivo).
+I widget nel `top_layer` LVGL non ricevono eventi touch in modo affidabile → la navbar va **dentro ogni pagina**. Inoltre, per evidenziare il pulsante della pagina attiva (stile `st_nav_active`: bg `0x232935` + bordo `0x7FB3D5`, contro `st_nav`: bg `0x171C24` senza bordo) NON si può usare un anchor condiviso (i widget LVGL non si aggiornano via anchor, e gli id non possono duplicarsi): serve una **navbar inline per pagina**, ognuna col proprio pulsante evidenziato. Il nome della pagina corrente si legge nella pill `lbl_page_name` del `top_layer`, aggiornata dal trigger `on_load` di ogni pagina.
+
+- **`st_nav` è solo per la navbar**, dove sta sulla fascia `0x0B0D12`. Dentro una card (`st_card`, bg `0x171C24`) avrebbe lo stesso colore del fondo → pulsante invisibile: per quelli c'è **`st_btn`** (bg `0x232935`, bordo `0x272E3A`).
 
 ### Icone e font speciali
 - **Icone Material Design**: font `font_mdi` scaricato in build (`type: web`, url del webfont Templarian/MaterialDesign-Webfont), glyphs per **codepoint** `"\U000Fxxxx"` (no supporto nativo `mdi:`). Verificare i codepoint su pictogrammers.com. Una label = un solo font.
 - **Tipografia Poppins via `gfonts://`**, ritagliata per taglia. Le taglie testuali (`f_24 f_20 f_16 f_14`) usano `glyphsets: [GF_Latin_Core]`, che copre anche gli accenti italiani (`ì à è é ò ù`); le taglie numeriche (`f_44`, `f_40`), che disegnano solo cifre/orologio, usano invece una lista `glyphs` esplicita.
 - **Il glyphset di default `GF_Latin_Kernel` ha `°` e `€` ma non gli accenti italiani.** Serve `GF_Latin_Core` per quelli, ma sono 319 glifi: applicarlo indiscriminatamente a tutte le taglie costerebbe ~367 KB invece di ~145 KB, da cui la divisione fra taglie testuali (Latin Core) e numeriche (glyphs mirati).
-- **I font builtin di LVGL (`montserrat_XX`) non sono gratuiti**: ogni taglia usata viene compilata con l'intero charset (`montserrat_48` da solo pesava ~95 KB). Sostituendoli con Poppins ritagliata sui soli glifi disegnati, il firmware è **sceso** dal 16.6% al 14.9% di flash pur aggiungendo sei taglie tipografiche e sedici icone meteo — nel progetto non compare più alcun `montserrat_*`.
+- **I font builtin di LVGL (`montserrat_XX`) non sono gratuiti**: ogni taglia usata viene compilata con l'intero charset (`montserrat_48` da solo pesava ~95 KB). Sostituendoli con Poppins ritagliata sui soli glifi disegnati, il firmware è **sceso** dal 16.7% al 14.8% di flash (1359635 → 1205127 B su 8126464) pur aggiungendo sei taglie tipografiche e sedici icone meteo — nel progetto non compare più alcun `montserrat_*`.
 - **Serve un secondo font MDI a 24 px** (`font_mdi_24`) oltre a `font_mdi` (40 px), perché quest'ultimo non entra nel chip icona da 44×44; occhio a non disallineare le due liste di glifi (rischio duplicati).
 - **Gli stili condivisi stanno in `lvgl: style_definitions:`** e si applicano ai widget con `styles: [nome]` — è quanto ha reso l'ingrandimento dei caratteri una modifica di due righe invece che di venti tile.
 - **L'header (ora/data/meteo/temperature) sta nel `top_layer`**: è sicuro perché non ha widget interattivi (l'avvertenza nota sul `top_layer` riguarda solo il touch), ed è l'unica sede possibile perché gli id LVGL sono unici e queste label non possono esistere in quattro copie (una per pagina).
@@ -175,10 +177,10 @@ Collegamento a LVGL: `touchscreens: [my_touch]`. Touch allineato (X 0→1024 sx�
 
 Gli `entity_id` reali stanno in `secrets.yaml` (non versionato), riferiti nel YAML via `!secret`. Mappa dei secret usati:
 
-- **Umidità**: `ent_um_giardino`, `ent_um_sala`, `ent_um_camera` (gauge 0–100 %)
-- **Temperature**: `ent_temp_giardino`, `ent_temp_sala`, `ent_temp_camera` (gauge −10..50 °C)
-- **Energia**: `ent_potenza` (potenza attuale, kW, 0–3.5), `ent_bolletta` (bolletta mese, 22–150)
-- **Meteo**: `ent_meteo` (entità `weather.*`) — usata due volte sulla Home: come `text_sensor` (lo **stato** → glifo MDI + colore dell'icona) e come `sensor` con `attribute: temperature` (→ label `24°`)
+- **Umidità**: `ent_um_giardino`, `ent_um_sala`, `ent_um_camera` (tile Home, `%`)
+- **Temperature**: `ent_temp_giardino`, `ent_temp_sala`, `ent_temp_camera` (tile Home, `°`). `ent_temp_giardino` alimenta anche la temperatura **esterna** dell'header, `ent_temp_sala` quella **interna**
+- **Energia**: `ent_potenza` (potenza attuale, kW), `ent_bolletta` (bolletta mese, €)
+- **Meteo**: `ent_meteo` (entità `weather.*`) — solo `text_sensor`: lo **stato** diventa glifo MDI + colore dell'icona nell'header. Il `sensor` con `attribute: temperature` è stato rimosso (la temperatura esterna viene dal sensore del giardino)
 - **Tesla (mese)**: `ent_tesla_costo` (€) e `ent_tesla_kwh_f1/f2/f3` — in HA non esiste un totale mensile, i kWh si **sommano per fascia** in un lambda (le fasce non ancora ricevute sono NaN → contate 0)
 - **Persone**: `ent_persona1`, `ent_persona2` + nomi visualizzati `nome_persona1`, `nome_persona2`
 
@@ -188,13 +190,13 @@ Vedi `secrets.yaml.example` per il modello da compilare.
 
 Dettaglio e riferimenti in [ROADMAP.md](ROADMAP.md).
 
-1. ✅ Display, touch, UI a pagine, orologio, dati live HA sulla Home (gauge temp/umidità, potenza, bolletta, persone)
+1. ✅ Display, touch, UI a pagine, orologio, dati live HA sulla Home (tile temp/umidità, potenza, bolletta, persone)
 2. ✅ Controllo pagine da HA (entità `select`)
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
 5. ✅ Pagina **Casa**: Routine (script Esco/Buongiorno/Buonanotte), Cucina (switch Caffè/Bollitore/Deum. con feedback colore), Pulizie (robot Igor), Tapparelle (su/stop/giù)
 6. ✅ Pagina **Giardino**: luce cucina esterna (toggle), consumo cucina, temperatura/umidità giardino, portafinestra (icona aperta/chiusa)
-7. **Restyling UI**: rendere l'interfaccia più moderna e accattivante (stili/temi LVGL, gradienti, angoli arrotondati, animazioni tra pagine, tipografia). Riferimenti: [LVGL in ESPHome](https://esphome.io/components/lvgl/), [lvgl/lvgl](https://github.com/lvgl/lvgl)
+7. ✅ **Restyling UI**: palette scura, header globale nel `top_layer`, tile piatte al posto dei gauge, dissolvenza fra le pagine, tipografia Poppins ritagliata per taglia
 8. **Gestione accensione display**: al tocco si accende, dopo **30 s di inutilizzo** si spegne il backlight (LVGL `on_idle` → backlight off via `io_extension_ws`; riaccensione su evento touch)
-9. (opzionale) icone anche sulla Home; sync inversa del select pagina
+9. (opzionale) sync inversa del `select` pagina verso Home Assistant
 10. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
