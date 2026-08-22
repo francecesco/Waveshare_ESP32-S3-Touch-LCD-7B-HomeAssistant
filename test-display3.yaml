@@ -486,13 +486,11 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
-            - lvgl.label.update: { id: lbl_porta, text: "Aperta" }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC" }
-            - lvgl.widget.update: { id: chip_porta, bg_color: 0xD2645E }
+            - lvgl.label.update: { id: lbl_porta, text: "Aperta", text_color: 0xD2645E }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC", text_color: 0xD2645E }
           else:
-            - lvgl.label.update: { id: lbl_porta, text: "Chiusa" }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB" }
-            - lvgl.widget.update: { id: chip_porta, bg_color: 0x8FBF9F }
+            - lvgl.label.update: { id: lbl_porta, text: "Chiusa", text_color: 0x8FBF9F }
+            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB", text_color: 0x8FBF9F }
 
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
@@ -1802,7 +1800,6 @@ lvgl:
             height: 200
             widgets:
               - obj:
-                  id: chip_porta
                   styles: [st_chip]
                   align: TOP_LEFT
                   x: 0
@@ -1815,7 +1812,7 @@ lvgl:
                         align: CENTER
                         text: "\U000F11DB"
                         text_font: font_mdi_24
-                        text_color: 0xE6EAF0
+                        text_color: 0x8FBF9F
               - label:
                   align: TOP_LEFT
                   x: 58
