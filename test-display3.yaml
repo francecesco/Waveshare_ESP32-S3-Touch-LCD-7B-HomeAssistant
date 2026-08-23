@@ -237,6 +237,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_bol
           text: !lambda 'return str_sprintf("%.0f", x);'
+          text_color: !lambda 'return x > 140.0 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);'
       - lvgl.label.update:
           id: lbl_e_previsione
           text: !lambda 'return str_sprintf("%.2f €", x);'
@@ -1858,6 +1859,7 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Luce esterna"
+                  text_font: f_24
                   styles: [st_label]
             on_click:
               - homeassistant.service:
@@ -1890,12 +1892,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Consumo cucina"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_g_consumo
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1925,12 +1928,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Portafinestra"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_porta
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   text_font: f_24
                   text_color: 0xE6EAF0
@@ -1961,12 +1965,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Temperatura"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_g_temp
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1995,12 +2000,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Umidità"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_g_um
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
