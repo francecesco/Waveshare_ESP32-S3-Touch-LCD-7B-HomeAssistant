@@ -240,6 +240,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_previsione
           text: !lambda 'return str_sprintf("%.2f €", x);'
+          text_color: !lambda 'return x > 140.0 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);'
   # --- Temperature (tile Home + header + tile Giardino) ---
   - platform: homeassistant
     id: temp_giardino
@@ -283,6 +284,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_oggi
           text: !lambda 'return str_sprintf("%.2f €", x);'
+          text_color: !lambda 'return x > 5.0 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);'
   - platform: homeassistant
     id: costo_mese_prec
     entity_id: !secret ent_costo_mese_prec
@@ -297,6 +299,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_consumo
           text: !lambda 'return str_sprintf("%.0f kWh", x);'
+          text_color: !lambda 'return x > 480.0 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);'
   - platform: homeassistant
     id: tesla_costo
     entity_id: !secret ent_tesla_costo
@@ -304,6 +307,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_e_tesla_eur
           text: !lambda 'return str_sprintf("%.2f €", x);'
+          text_color: !lambda 'return x > 55.0 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);'
   - platform: homeassistant
     id: tesla_kwh_f1
     entity_id: !secret ent_tesla_kwh_f1
@@ -316,6 +320,11 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return str_sprintf("%.0f kWh",
                 v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+          text_color: !lambda |-
+            // Stessa somma del testo: x e' una sola fascia e da sola non dice nulla.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return (v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state)) > 220.0f
+                ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);
   - platform: homeassistant
     id: tesla_kwh_f2
     entity_id: !secret ent_tesla_kwh_f2
@@ -328,6 +337,11 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return str_sprintf("%.0f kWh",
                 v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+          text_color: !lambda |-
+            // Stessa somma del testo: x e' una sola fascia e da sola non dice nulla.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return (v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state)) > 220.0f
+                ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);
   - platform: homeassistant
     id: tesla_kwh_f3
     entity_id: !secret ent_tesla_kwh_f3
@@ -340,6 +354,11 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return str_sprintf("%.0f kWh",
                 v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state));
+          text_color: !lambda |-
+            // Stessa somma del testo: x e' una sola fascia e da sola non dice nulla.
+            auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
+            return (v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state)) > 220.0f
+                ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);
   # --- Giardino: consumo cucina esterna ---
   - platform: homeassistant
     id: consumo_cucina
@@ -1095,10 +1114,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Casa"
+                        text: "Energia"
                   on_click:
                     - lvgl.page.show:
-                        id: page_casa
+                        id: page_energia
                         animation: FADE_IN
                         time: 150ms
               - button:
@@ -1110,10 +1129,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Energia"
+                        text: "Casa"
                   on_click:
                     - lvgl.page.show:
-                        id: page_energia
+                        id: page_casa
                         animation: FADE_IN
                         time: 150ms
               - button:
@@ -1466,24 +1485,9 @@ lvgl:
                         animation: FADE_IN
                         time: 150ms
               - button:
-                  styles: [st_nav_active]
-                  align: LEFT_MID
-                  x: 267
-                  width: 231
-                  height: 60
-                  widgets:
-                    - label:
-                        align: CENTER
-                        text: "Casa"
-                  on_click:
-                    - lvgl.page.show:
-                        id: page_casa
-                        animation: FADE_IN
-                        time: 150ms
-              - button:
                   styles: [st_nav]
                   align: LEFT_MID
-                  x: 514
+                  x: 267
                   width: 231
                   height: 60
                   widgets:
@@ -1493,6 +1497,21 @@ lvgl:
                   on_click:
                     - lvgl.page.show:
                         id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
+              - button:
+                  styles: [st_nav_active]
+                  align: LEFT_MID
+                  x: 514
+                  width: 231
+                  height: 60
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Casa"
+                  on_click:
+                    - lvgl.page.show:
+                        id: page_casa
                         animation: FADE_IN
                         time: 150ms
               - button:
@@ -1546,12 +1565,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Spesa oggi"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_oggi
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1580,12 +1600,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Previsione mese"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_previsione
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1614,12 +1635,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Mese scorso"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_prec
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         # Riga 2: consumo mese, Tesla €, Tesla kWh
@@ -1649,12 +1671,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Consumo mese"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_consumo
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1683,12 +1706,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Tesla mese"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_tesla_eur
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1717,12 +1741,13 @@ lvgl:
                   x: 58
                   y: 2
                   text: "Tesla kWh mese"
+                  text_font: f_24
                   styles: [st_label]
               - label:
                   id: lbl_e_tesla_kwh
                   align: TOP_LEFT
                   x: 58
-                  y: 30
+                  y: 38
                   text: "--"
                   styles: [st_value]
         - obj:
@@ -1751,24 +1776,9 @@ lvgl:
                         animation: FADE_IN
                         time: 150ms
               - button:
-                  styles: [st_nav]
-                  align: LEFT_MID
-                  x: 267
-                  width: 231
-                  height: 60
-                  widgets:
-                    - label:
-                        align: CENTER
-                        text: "Casa"
-                  on_click:
-                    - lvgl.page.show:
-                        id: page_casa
-                        animation: FADE_IN
-                        time: 150ms
-              - button:
                   styles: [st_nav_active]
                   align: LEFT_MID
-                  x: 514
+                  x: 267
                   width: 231
                   height: 60
                   widgets:
@@ -1778,6 +1788,21 @@ lvgl:
                   on_click:
                     - lvgl.page.show:
                         id: page_energia
+                        animation: FADE_IN
+                        time: 150ms
+              - button:
+                  styles: [st_nav]
+                  align: LEFT_MID
+                  x: 514
+                  width: 231
+                  height: 60
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Casa"
+                  on_click:
+                    - lvgl.page.show:
+                        id: page_casa
                         animation: FADE_IN
                         time: 150ms
               - button:
@@ -2012,10 +2037,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Casa"
+                        text: "Energia"
                   on_click:
                     - lvgl.page.show:
-                        id: page_casa
+                        id: page_energia
                         animation: FADE_IN
                         time: 150ms
               - button:
@@ -2027,10 +2052,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Energia"
+                        text: "Casa"
                   on_click:
                     - lvgl.page.show:
-                        id: page_energia
+                        id: page_casa
                         animation: FADE_IN
                         time: 150ms
               - button:
