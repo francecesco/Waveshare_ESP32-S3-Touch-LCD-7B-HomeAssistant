@@ -201,9 +201,11 @@ sensor:
       - lvgl.label.update:
           id: lbl_um_g
           text: !lambda 'return str_sprintf("%.0f%%", x);'
+          text_color: !lambda 'return x < 30 ? lv_color_hex(0xD7A24C) : (x > 80 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
       - lvgl.label.update:
           id: lbl_g_um
           text: !lambda 'return str_sprintf("%.0f%%", x);'
+          text_color: !lambda 'return x < 30 ? lv_color_hex(0xD7A24C) : (x > 80 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
   - platform: homeassistant
     id: um_sala
     entity_id: !secret ent_um_sala
@@ -211,6 +213,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_um_s
           text: !lambda 'return str_sprintf("%.0f%%", x);'
+          text_color: !lambda 'return x < 35 ? lv_color_hex(0xD7A24C) : (x > 65 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
   - platform: homeassistant
     id: um_camera
     entity_id: !secret ent_um_camera
@@ -218,6 +221,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_um_c
           text: !lambda 'return str_sprintf("%.0f%%", x);'
+          text_color: !lambda 'return x < 35 ? lv_color_hex(0xD7A24C) : (x > 65 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
   # --- Energia ---
   - platform: homeassistant
     id: potenza
@@ -244,9 +248,11 @@ sensor:
       - lvgl.label.update:
           id: lbl_t_g
           text: !lambda 'return str_sprintf("%.1f°", x);'
+          text_color: !lambda 'return x < 7 ? lv_color_hex(0x7FB3D5) : (x > 33 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
       - lvgl.label.update:
           id: lbl_g_temp
           text: !lambda 'return str_sprintf("%.1f°", x);'
+          text_color: !lambda 'return x < 7 ? lv_color_hex(0x7FB3D5) : (x > 33 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
       - lvgl.label.update:
           id: lbl_ext
           text: !lambda 'return str_sprintf("%.1f°", x);'
@@ -257,6 +263,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_t_s
           text: !lambda 'return str_sprintf("%.1f°", x);'
+          text_color: !lambda 'return x < 18 ? lv_color_hex(0x7FB3D5) : (x > 26 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
       - lvgl.label.update:
           id: lbl_int
           text: !lambda 'return str_sprintf("%.1f°", x);'
@@ -267,6 +274,7 @@ sensor:
       - lvgl.label.update:
           id: lbl_t_c
           text: !lambda 'return str_sprintf("%.1f°", x);'
+          text_color: !lambda 'return x < 18 ? lv_color_hex(0x7FB3D5) : (x > 26 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
   # --- Energia (pagina Energia) ---
   - platform: homeassistant
     id: costo_oggi
@@ -727,7 +735,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 20
-            y: 84
+            y: 228
             width: 317
             height: 128
             widgets:
@@ -761,7 +769,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 353
-            y: 84
+            y: 228
             width: 317
             height: 128
             widgets:
@@ -795,7 +803,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 686
-            y: 84
+            y: 228
             width: 317
             height: 128
             widgets:
@@ -830,7 +838,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 20
-            y: 228
+            y: 372
             width: 317
             height: 128
             widgets:
@@ -864,7 +872,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 353
-            y: 228
+            y: 372
             width: 317
             height: 128
             widgets:
@@ -898,7 +906,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 686
-            y: 228
+            y: 372
             width: 317
             height: 128
             widgets:
@@ -933,7 +941,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 20
-            y: 372
+            y: 84
             width: 317
             height: 128
             widgets:
@@ -967,7 +975,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 353
-            y: 372
+            y: 84
             width: 317
             height: 128
             widgets:
@@ -1001,7 +1009,7 @@ lvgl:
             styles: [st_card]
             align: TOP_LEFT
             x: 686
-            y: 372
+            y: 84
             width: 317
             height: 128
             widgets:
