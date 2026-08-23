@@ -26,12 +26,10 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
 
 ## In programma
 
-### 1. Gestione accensione display
-
-- [ ] Accensione al tocco, spegnimento del backlight dopo **30 s** di inutilizzo
-      (LVGL `on_idle` → backlight off via `io_extension_ws`, riaccensione su touch)
-
-### 2. Rifiniture
-
 - [ ] (opzionale) sincronizzazione inversa del `select` pagina verso Home Assistant
 - [ ] IP statico: riservare il DHCP per il MAC del dispositivo nel router
+
+## Non si fa
+
+- **Spegnimento automatico del display.** Gestito da un'automazione lato Home
+  Assistant, non serve implementarlo nel firmware.

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Plancia di controllo/informativa da ingresso basata sul display **Waveshare ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), con ESPHome + LVGL e integrazione Home Assistant. UI a pagine: Home (orologio, meteo, temperature, stato Tesla), Casa, Energia, Giardino.
 
-**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Restano tre voci: spegnimento del backlight dopo 30 s, sync inversa del `select` pagina, IP statico — vedi [ROADMAP.md](ROADMAP.md).
+**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Restano due voci opzionali: sync inversa del `select` pagina e IP statico — vedi [ROADMAP.md](ROADMAP.md). Lo spegnimento automatico del display **non** si fa nel firmware: e' gestito da un'automazione lato Home Assistant.
 
 ## Comandi principali
 
@@ -197,6 +197,5 @@ Dettaglio e riferimenti in [ROADMAP.md](ROADMAP.md).
 5. ✅ Pagina **Casa**: quattro macro tile 484x200 — Igor (l'`on_click` sceglie fra `vacuum.start` e `vacuum.return_to_base` con un `if` sullo stato di `st_vacuum`), Tapparelle (su/stop/giù dentro un'unica tile), routine Esco e Buonanotte. I controlli cucina e la routine Buongiorno sono stati rimossi: troppi bersagli e troppo piccoli. Gli `entity_id` restano in `secrets.yaml`.
 6. ✅ Pagina **Giardino**: luce cucina esterna (toggle), consumo cucina, temperatura/umidità giardino, portafinestra (icona aperta/chiusa)
 7. ✅ **Restyling UI**: palette scura, header globale nel `top_layer`, tile piatte al posto dei gauge, dissolvenza fra le pagine, tipografia Poppins ritagliata per taglia
-8. **Gestione accensione display**: al tocco si accende, dopo **30 s di inutilizzo** si spegne il backlight (LVGL `on_idle` → backlight off via `io_extension_ws`; riaccensione su evento touch)
 9. (opzionale) sync inversa del `select` pagina verso Home Assistant
 10. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
