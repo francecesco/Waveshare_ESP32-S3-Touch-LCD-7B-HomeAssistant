@@ -14,8 +14,8 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
 - [x] Controllo della pagina visualizzata da Home Assistant (entità `select`)
 - [x] Pagina **Energia**: tile con icone MDI (spesa oggi / previsione / mese scorso,
       consumo, Tesla €/kWh)
-- [x] Pagina **Casa**: routine (script), controlli cucina (switch con feedback colore),
-      robot aspirapolvere, tapparelle
+- [x] Pagina **Casa**: quattro macro tile — Igor (avvia / rimanda alla base a
+      seconda dello stato), tapparelle (su/stop/giù), routine Esco e Buonanotte
 - [x] Pagina **Giardino**: luce e consumo cucina esterna, temperatura/umidità giardino,
       stato portafinestra
 - [x] **Restyling UI**: palette scura ispirata agli screenshot di riferimento, header

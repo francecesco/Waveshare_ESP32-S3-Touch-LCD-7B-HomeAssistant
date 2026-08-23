@@ -460,54 +460,15 @@ text_sensor:
             if (x == "idle") return std::string("Fermo");
             if (x == "error") return std::string("Errore");
             return x;
+      # Il testo grande della tile dice cosa succede se premi, non cosa sta facendo.
+      - lvgl.label.update:
+          id: lbl_igor_act
+          text: !lambda |-
+            if (x == "cleaning" || x == "returning") return std::string("Alla base");
+            return std::string("Avvia");
 
 # Stato switch cucina -> colora i pulsanti quando accesi (pagina Casa)
 binary_sensor:
-  - platform: homeassistant
-    id: st_caffe
-    entity_id: !secret ent_sw_caffe
-    on_state:
-      - if:
-          condition:
-            lambda: 'return x;'
-          then:
-            - lvgl.widget.update: { id: btn_caffe, bg_color: 0xE0908A }
-            - lvgl.label.update: { id: lbl_btn_caffe, text_color: 0x0E1116 }
-            - lvgl.label.update: { id: ico_caffe, text_color: 0x0E1116 }
-          else:
-            - lvgl.widget.update: { id: btn_caffe, bg_color: 0x232935 }
-            - lvgl.label.update: { id: lbl_btn_caffe, text_color: 0xE6EAF0 }
-            - lvgl.label.update: { id: ico_caffe, text_color: 0x848D9C }
-  - platform: homeassistant
-    id: st_bollitore
-    entity_id: !secret ent_sw_bollitore
-    on_state:
-      - if:
-          condition:
-            lambda: 'return x;'
-          then:
-            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0xE0908A }
-            - lvgl.label.update: { id: lbl_btn_bollitore, text_color: 0x0E1116 }
-            - lvgl.label.update: { id: ico_bollitore, text_color: 0x0E1116 }
-          else:
-            - lvgl.widget.update: { id: btn_bollitore, bg_color: 0x232935 }
-            - lvgl.label.update: { id: lbl_btn_bollitore, text_color: 0xE6EAF0 }
-            - lvgl.label.update: { id: ico_bollitore, text_color: 0x848D9C }
-  - platform: homeassistant
-    id: st_deum
-    entity_id: !secret ent_sw_deum
-    on_state:
-      - if:
-          condition:
-            lambda: 'return x;'
-          then:
-            - lvgl.widget.update: { id: btn_deum, bg_color: 0x7FB3D5 }
-            - lvgl.label.update: { id: lbl_btn_deum, text_color: 0x0E1116 }
-            - lvgl.label.update: { id: ico_deum, text_color: 0x0E1116 }
-          else:
-            - lvgl.widget.update: { id: btn_deum, bg_color: 0x232935 }
-            - lvgl.label.update: { id: lbl_btn_deum, text_color: 0xE6EAF0 }
-            - lvgl.label.update: { id: ico_deum, text_color: 0x848D9C }
   # --- Giardino: luce cucina esterna (colore se accesa) ---
   - platform: homeassistant
     id: st_luce_cucina
@@ -1159,191 +1120,12 @@ lvgl:
             id: lbl_page_name
             text: "Casa"
       widgets:
-        # ===== ROUTINE (script) =====
-        - obj:
+        - button:
             styles: [st_card]
+            border_color: 0x7FB3D5
             align: TOP_LEFT
             x: 20
             y: 84
-            width: 484
-            height: 200
-            widgets:
-              - label:
-                  align: TOP_LEFT
-                  x: 0
-                  y: 0
-                  text: "Routine"
-                  text_font: f_24
-                  text_color: 0xE6EAF0
-              - button:
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 44
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F0A48"
-                        text_font: font_mdi_24
-                        text_color: 0x8FBF9F
-                    - label:
-                        align: LEFT_MID
-                        x: 48
-                        text: "Esco"
-                  on_click:
-                    - homeassistant.service:
-                        service: script.turn_on
-                        data:
-                          entity_id: !secret ent_script_esco
-              - button:
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 90
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F059C"
-                        text_font: font_mdi_24
-                        text_color: 0xD7A24C
-                    - label:
-                        align: LEFT_MID
-                        x: 48
-                        text: "Buongiorno"
-                  on_click:
-                    - homeassistant.service:
-                        service: script.turn_on
-                        data:
-                          entity_id: !secret ent_script_buongiorno
-              - button:
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 136
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F0594"
-                        text_font: font_mdi_24
-                        text_color: 0x9E8FC7
-                    - label:
-                        align: LEFT_MID
-                        x: 48
-                        text: "Buonanotte"
-                  on_click:
-                    - homeassistant.service:
-                        service: script.turn_on
-                        data:
-                          entity_id: !secret ent_script_buonanotte
-        # ===== CUCINA (switch toggle) =====
-        - obj:
-            styles: [st_card]
-            align: TOP_LEFT
-            x: 520
-            y: 84
-            width: 484
-            height: 200
-            widgets:
-              - label:
-                  align: TOP_LEFT
-                  x: 0
-                  y: 0
-                  text: "Cucina"
-                  text_font: f_24
-                  text_color: 0xE6EAF0
-              - button:
-                  id: btn_caffe
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 44
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        id: ico_caffe
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F0176"
-                        text_font: font_mdi_24
-                        text_color: 0x848D9C
-                    - label:
-                        id: lbl_btn_caffe
-                        align: LEFT_MID
-                        x: 48
-                        text: "Caffè"
-                  on_click:
-                    - homeassistant.service:
-                        service: switch.toggle
-                        data:
-                          entity_id: !secret ent_sw_caffe
-              - button:
-                  id: btn_bollitore
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 90
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        id: ico_bollitore
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F05FA"
-                        text_font: font_mdi_24
-                        text_color: 0x848D9C
-                    - label:
-                        id: lbl_btn_bollitore
-                        align: LEFT_MID
-                        x: 48
-                        text: "Bollitore"
-                  on_click:
-                    - homeassistant.service:
-                        service: switch.toggle
-                        data:
-                          entity_id: !secret ent_sw_bollitore
-              - button:
-                  id: btn_deum
-                  styles: [st_btn]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 136
-                  width: 456
-                  height: 34
-                  widgets:
-                    - label:
-                        id: ico_deum
-                        align: LEFT_MID
-                        x: 12
-                        text: "\U000F1099"
-                        text_font: font_mdi_24
-                        text_color: 0x848D9C
-                    - label:
-                        id: lbl_btn_deum
-                        align: LEFT_MID
-                        x: 48
-                        text: "Deum."
-                  on_click:
-                    - homeassistant.service:
-                        service: switch.toggle
-                        data:
-                          entity_id: !secret ent_sw_deum
-        # ===== PULIZIE (vacuum) =====
-        - obj:
-            styles: [st_card]
-            align: TOP_LEFT
-            x: 20
-            y: 300
             width: 484
             height: 200
             widgets:
@@ -1361,48 +1143,60 @@ lvgl:
                         text_font: font_mdi_24
                         text_color: 0x7FB3D5
               - label:
+                  id: lbl_igor_act
                   align: TOP_LEFT
                   x: 58
-                  y: 10
-                  text: "Igor"
+                  y: 4
+                  text: "Avvia"
                   text_font: f_24
                   text_color: 0xE6EAF0
               - label:
                   id: lbl_igor
-                  align: TOP_RIGHT
-                  x: 0
-                  y: 14
-                  text: "--"
-                  styles: [st_label]
-              - button:
-                  styles: [st_btn]
                   align: TOP_LEFT
-                  x: 0
-                  y: 64
-                  width: 456
-                  height: 96
-                  widgets:
-                    - label:
-                        align: CENTER
-                        text: "Avvia"
-                  on_click:
+                  x: 58
+                  y: 40
+                  text: "--"
+                  text_font: f_20
+                  text_color: 0x848D9C
+            on_click:
+              - if:
+                  condition:
+                    lambda: 'return id(st_vacuum).state == "cleaning" || id(st_vacuum).state == "returning";'
+                  then:
+                    - homeassistant.service:
+                        service: vacuum.return_to_base
+                        data:
+                          entity_id: !secret ent_vacuum
+                  else:
                     - homeassistant.service:
                         service: vacuum.start
                         data:
                           entity_id: !secret ent_vacuum
-        # ===== TAPPARELLE (cover) =====
         - obj:
             styles: [st_card]
             align: TOP_LEFT
             x: 520
-            y: 300
+            y: 84
             width: 484
             height: 200
             widgets:
-              - label:
+              - obj:
+                  styles: [st_chip]
                   align: TOP_LEFT
                   x: 0
                   y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F111C"
+                        text_font: font_mdi_24
+                        text_color: 0xD7A24C
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 4
                   text: "Tapparelle"
                   text_font: f_24
                   text_color: 0xE6EAF0
@@ -1460,6 +1254,74 @@ lvgl:
                         service: cover.close_cover
                         data:
                           entity_id: !secret ent_cover_tapparelle
+        - button:
+            styles: [st_card]
+            border_color: 0x8FBF9F
+            align: TOP_LEFT
+            x: 20
+            y: 300
+            width: 484
+            height: 200
+            widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0A48"
+                        text_font: font_mdi_24
+                        text_color: 0x8FBF9F
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 4
+                  text: "Esco"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+            on_click:
+              - homeassistant.service:
+                  service: script.turn_on
+                  data:
+                    entity_id: !secret ent_script_esco
+        - button:
+            styles: [st_card]
+            border_color: 0x9E8FC7
+            align: TOP_LEFT
+            x: 520
+            y: 300
+            width: 484
+            height: 200
+            widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: TOP_LEFT
+                  x: 0
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "\U000F0594"
+                        text_font: font_mdi_24
+                        text_color: 0x9E8FC7
+              - label:
+                  align: TOP_LEFT
+                  x: 58
+                  y: 4
+                  text: "Buonanotte"
+                  text_font: f_24
+                  text_color: 0xE6EAF0
+            on_click:
+              - homeassistant.service:
+                  service: script.turn_on
+                  data:
+                    entity_id: !secret ent_script_buonanotte
         - obj:
             align: BOTTOM_MID
             width: 1024

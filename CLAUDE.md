@@ -194,7 +194,7 @@ Dettaglio e riferimenti in [ROADMAP.md](ROADMAP.md).
 2. ✅ Controllo pagine da HA (entità `select`)
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
-5. ✅ Pagina **Casa**: Routine (script Esco/Buongiorno/Buonanotte), Cucina (switch Caffè/Bollitore/Deum. con feedback colore), Pulizie (robot Igor), Tapparelle (su/stop/giù)
+5. ✅ Pagina **Casa**: quattro macro tile 484x200 — Igor (l'`on_click` sceglie fra `vacuum.start` e `vacuum.return_to_base` con un `if` sullo stato di `st_vacuum`), Tapparelle (su/stop/giù dentro un'unica tile), routine Esco e Buonanotte. I controlli cucina e la routine Buongiorno sono stati rimossi: troppi bersagli e troppo piccoli. Gli `entity_id` restano in `secrets.yaml`.
 6. ✅ Pagina **Giardino**: luce cucina esterna (toggle), consumo cucina, temperatura/umidità giardino, portafinestra (icona aperta/chiusa)
 7. ✅ **Restyling UI**: palette scura, header globale nel `top_layer`, tile piatte al posto dei gauge, dissolvenza fra le pagine, tipografia Poppins ritagliata per taglia
 8. **Gestione accensione display**: al tocco si accende, dopo **30 s di inutilizzo** si spegne il backlight (LVGL `on_idle` → backlight off via `io_extension_ws`; riaccensione su evento touch)
