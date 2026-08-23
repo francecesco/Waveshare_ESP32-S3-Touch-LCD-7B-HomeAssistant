@@ -357,16 +357,32 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: lbl_fra
-          text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
-          text_color: !lambda 'return x == "home" ? lv_color_hex(0x8FBF9F) : lv_color_hex(0x848D9C);'
+          text: !lambda |-
+            // HA riporta "home", "not_home", oppure il nome della zona.
+            // Il ramo generico mostra la zona invece di appiattirla su "Fuori".
+            if (x == "home") return std::string("Casa");
+            if (x == "not_home") return std::string("Fuori");
+            return x;
+          text_color: !lambda |-
+            if (x == "home") return lv_color_hex(0x8FBF9F);      // salvia: in casa
+            if (x == "not_home") return lv_color_hex(0x848D9C);  // muted: fuori, posto ignoto
+            return lv_color_hex(0x7FB3D5);                        // blu: in una zona nota
   - platform: homeassistant
     id: pers_2
     entity_id: !secret ent_persona2
     on_value:
       - lvgl.label.update:
           id: lbl_cos
-          text: !lambda 'return x == "home" ? std::string("Casa") : std::string("Fuori");'
-          text_color: !lambda 'return x == "home" ? lv_color_hex(0x8FBF9F) : lv_color_hex(0x848D9C);'
+          text: !lambda |-
+            // HA riporta "home", "not_home", oppure il nome della zona.
+            // Il ramo generico mostra la zona invece di appiattirla su "Fuori".
+            if (x == "home") return std::string("Casa");
+            if (x == "not_home") return std::string("Fuori");
+            return x;
+          text_color: !lambda |-
+            if (x == "home") return lv_color_hex(0x8FBF9F);      // salvia: in casa
+            if (x == "not_home") return lv_color_hex(0x848D9C);  // muted: fuori, posto ignoto
+            return lv_color_hex(0x7FB3D5);                        // blu: in una zona nota
   # --- Meteo: condizione -> icona MDI e colore ---
   # I glifi sono scritti come universal-character-name C++ (\UXXXXXXXX):
   # qui siamo in un block scalar, YAML non interpreta gli escape, lo fa il compilatore.
@@ -1016,30 +1032,32 @@ lvgl:
               - label:
                   align: TOP_LEFT
                   x: 0
-                  y: 8
+                  y: 13
                   text: !secret nome_persona1
-                  styles: [st_label]
+                  text_font: f_16
+                  text_color: 0x848D9C
               - label:
                   id: lbl_fra
                   align: TOP_RIGHT
                   x: 0
                   y: 8
                   text: "--"
-                  text_font: f_16
+                  text_font: f_24
                   text_color: 0xE6EAF0
               - label:
                   align: TOP_LEFT
                   x: 0
-                  y: 56
+                  y: 61
                   text: !secret nome_persona2
-                  styles: [st_label]
+                  text_font: f_16
+                  text_color: 0x848D9C
               - label:
                   id: lbl_cos
                   align: TOP_RIGHT
                   x: 0
                   y: 56
                   text: "--"
-                  text_font: f_16
+                  text_font: f_24
                   text_color: 0xE6EAF0
         # Barra di navigazione: duplicata inline in ogni pagina (gli anchor LVGL non
         # si aggiornano, quindi ogni pagina ha la propria copia col tasto attivo)
