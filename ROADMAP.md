@@ -18,8 +18,7 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
       consumo, Tesla €/kWh)
 - [x] Pagina **Casa**: quattro macro tile — Igor (avvia / rimanda alla base a
       seconda dello stato), tapparelle (su/stop/giù), routine Esco e Buonanotte
-- [x] Pagina **Giardino**: luce e consumo cucina esterna, temperatura/umidità giardino,
-      stato portafinestra
+- [x] Pagina **Calendario**: un riquadro per calendario Home Assistant (raccolta differenziata, whereveroffice, pole pole) col prossimo impegno e quando — "Oggi" / "Domani" / "24 ago", con l'orario solo se non e' un evento di giornata intera
 - [x] **Restyling UI**: palette scura ispirata agli screenshot di riferimento, header
       globale (ora/data/meteo/temperature) nel `top_layer`, tile piatte al posto dei
       gauge, transizioni in dissolvenza fra le pagine, tipografia Poppins (ritagliata

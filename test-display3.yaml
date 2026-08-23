@@ -108,6 +108,10 @@ font:
       - "\U000F059D"  # weather-windy (windy)
       - "\U000F059E"  # weather-windy-variant
       - "\U000F05D6"  # alert-circle-outline (exceptional)
+      # --- calendario ---
+      - "\U000F044C"  # recycle (raccolta differenziata)
+      - "\U000F0322"  # laptop (whereveroffice)
+      - "\U000F1055"  # palm-tree (pole pole)
 
   # --- Poppins: tipografia del restyling (vedi spec) ---
   # Taglie "numeriche": lista glyphs esplicita, non serve tutto il Latin Core.
@@ -195,6 +199,10 @@ font:
       - "\U000F059D"  # weather-windy (windy)
       - "\U000F059E"  # weather-windy-variant
       - "\U000F05D6"  # alert-circle-outline (exceptional)
+      # --- calendario ---
+      - "\U000F044C"  # recycle (raccolta differenziata)
+      - "\U000F0322"  # laptop (whereveroffice)
+      - "\U000F1055"  # palm-tree (pole pole)
 
 # --- Sensori da Home Assistant (ricevuti via API) ---
 sensor:
@@ -205,10 +213,6 @@ sensor:
     on_value:
       - lvgl.label.update:
           id: lbl_um_g
-          text: !lambda 'return str_sprintf("%.0f%%", x);'
-          text_color: !lambda 'return x < 30 ? lv_color_hex(0xD7A24C) : (x > 80 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
-      - lvgl.label.update:
-          id: lbl_g_um
           text: !lambda 'return str_sprintf("%.0f%%", x);'
           text_color: !lambda 'return x < 30 ? lv_color_hex(0xD7A24C) : (x > 80 ? lv_color_hex(0x7FB3D5) : lv_color_hex(0x8FBF9F));'
   - platform: homeassistant
@@ -254,10 +258,6 @@ sensor:
     on_value:
       - lvgl.label.update:
           id: lbl_t_g
-          text: !lambda 'return str_sprintf("%.1f°", x);'
-          text_color: !lambda 'return x < 7 ? lv_color_hex(0x7FB3D5) : (x > 33 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
-      - lvgl.label.update:
-          id: lbl_g_temp
           text: !lambda 'return str_sprintf("%.1f°", x);'
           text_color: !lambda 'return x < 7 ? lv_color_hex(0x7FB3D5) : (x > 33 ? lv_color_hex(0xD7A24C) : lv_color_hex(0x8FBF9F));'
       - lvgl.label.update:
@@ -365,17 +365,127 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return (v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state)) > 220.0f
                 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);
-  # --- Giardino: consumo cucina esterna ---
+  # --- Giardino: consumo cucina esterna ---# --- Persone (stato casa/fuori) ---
+text_sensor:
+  # --- Calendario: un'entita' calendar.* espone SOLO il prossimo evento,
+  #     nei suoi attributi. Per ciascuna servono due sensori: il titolo e quando.
   - platform: homeassistant
-    id: consumo_cucina
-    entity_id: !secret ent_consumo_cucina
+    id: cal_rifiuti_msg
+    entity_id: !secret ent_cal_rifiuti
+    attribute: message
     on_value:
       - lvgl.label.update:
-          id: lbl_g_consumo
-          text: !lambda 'return str_sprintf("%.0f W", x);'
-
-# --- Persone (stato casa/fuori) ---
-text_sensor:
+          id: lbl_cal_rifiuti_msg
+          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
+          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
+  - platform: homeassistant
+    id: cal_rifiuti_start
+    entity_id: !secret ent_cal_rifiuti
+    attribute: start_time
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cal_rifiuti_when
+          text: !lambda |-
+            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
+            if (x.length() < 16) return std::string("");
+            int Y = atoi(x.substr(0, 4).c_str());
+            int M = atoi(x.substr(5, 2).c_str());
+            int D = atoi(x.substr(8, 2).c_str());
+            std::string ora_ev = x.substr(11, 5);
+            auto n = id(ora).now();
+            if (!n.is_valid()) return x.substr(0, 10);
+            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
+            std::string quando;
+            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
+            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
+            else {
+              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
+                                         "lug","ago","set","ott","nov","dic"};
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
+              quando = buf;
+            }
+            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
+            if (ora_ev != "00:00") quando += " " + ora_ev;
+            return quando;
+  - platform: homeassistant
+    id: cal_office_msg
+    entity_id: !secret ent_cal_office
+    attribute: message
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cal_office_msg
+          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
+          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
+  - platform: homeassistant
+    id: cal_office_start
+    entity_id: !secret ent_cal_office
+    attribute: start_time
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cal_office_when
+          text: !lambda |-
+            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
+            if (x.length() < 16) return std::string("");
+            int Y = atoi(x.substr(0, 4).c_str());
+            int M = atoi(x.substr(5, 2).c_str());
+            int D = atoi(x.substr(8, 2).c_str());
+            std::string ora_ev = x.substr(11, 5);
+            auto n = id(ora).now();
+            if (!n.is_valid()) return x.substr(0, 10);
+            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
+            std::string quando;
+            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
+            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
+            else {
+              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
+                                         "lug","ago","set","ott","nov","dic"};
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
+              quando = buf;
+            }
+            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
+            if (ora_ev != "00:00") quando += " " + ora_ev;
+            return quando;
+  - platform: homeassistant
+    id: cal_pole_msg
+    entity_id: !secret ent_cal_pole
+    attribute: message
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cal_pole_msg
+          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
+          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
+  - platform: homeassistant
+    id: cal_pole_start
+    entity_id: !secret ent_cal_pole
+    attribute: start_time
+    on_value:
+      - lvgl.label.update:
+          id: lbl_cal_pole_when
+          text: !lambda |-
+            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
+            if (x.length() < 16) return std::string("");
+            int Y = atoi(x.substr(0, 4).c_str());
+            int M = atoi(x.substr(5, 2).c_str());
+            int D = atoi(x.substr(8, 2).c_str());
+            std::string ora_ev = x.substr(11, 5);
+            auto n = id(ora).now();
+            if (!n.is_valid()) return x.substr(0, 10);
+            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
+            std::string quando;
+            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
+            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
+            else {
+              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
+                                         "lug","ago","set","ott","nov","dic"};
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
+              quando = buf;
+            }
+            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
+            if (ora_ev != "00:00") quando += " " + ora_ev;
+            return quando;
   - platform: homeassistant
     id: pers_1
     entity_id: !secret ent_persona1
@@ -475,34 +585,7 @@ text_sensor:
 # Stato switch cucina -> colora i pulsanti quando accesi (pagina Casa)
 binary_sensor:
   # --- Giardino: luce cucina esterna (colore se accesa) ---
-  - platform: homeassistant
-    id: st_luce_cucina
-    entity_id: !secret ent_luce_cucina_est
-    on_state:
-      - if:
-          condition:
-            lambda: 'return x;'
-          then:
-            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0xD7A24C }
-            - lvgl.label.update: { id: lbl_btn_luce, text_color: 0x0E1116 }
-          else:
-            - lvgl.widget.update: { id: btn_luce_cucina, bg_color: 0x232935 }
-            - lvgl.label.update: { id: lbl_btn_luce, text_color: 0xE6EAF0 }
   # --- Giardino: portafinestra (icona + testo aperta/chiusa) ---
-  - platform: homeassistant
-    id: st_porta
-    entity_id: !secret ent_portafinestra
-    on_state:
-      - if:
-          condition:
-            lambda: 'return x;'
-          then:
-            - lvgl.label.update: { id: lbl_porta, text: "Aperta", text_color: 0xD2645E }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DC", text_color: 0xD2645E }
-          else:
-            - lvgl.label.update: { id: lbl_porta, text: "Chiusa", text_color: 0x8FBF9F }
-            - lvgl.label.update: { id: lbl_porta_icon, text: "\U000F11DB", text_color: 0x8FBF9F }
-
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
   - platform: sntp
@@ -1121,10 +1204,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Giardino"
+                        text: "Calendario"
                   on_click:
                     - lvgl.page.show:
-                        id: page_giardino
+                        id: page_calendario
                         animation: FADE_IN
                         time: 150ms
     - id: page_casa
@@ -1411,10 +1494,10 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Giardino"
+                        text: "Calendario"
                   on_click:
                     - lvgl.page.show:
-                        id: page_giardino
+                        id: page_calendario
                         animation: FADE_IN
                         time: 150ms
     - id: page_energia
@@ -1712,210 +1795,159 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Giardino"
+                        text: "Calendario"
                   on_click:
                     - lvgl.page.show:
-                        id: page_giardino
+                        id: page_calendario
                         animation: FADE_IN
                         time: 150ms
-    - id: page_giardino
+    - id: page_calendario
       bg_color: 0x0E1116
       bg_opa: COVER
       on_load:
         - lvgl.label.update:
             id: lbl_page_name
-            text: "Giardino"
-        # Sync inversa: la pagina si annuncia a Home Assistant, comunque ci si
-        # sia arrivati (dito, automazione, riavvio). Il confronto evita di
-        # riscrivere un valore identico.
+            text: "Calendario"
         - if:
             condition:
-              lambda: 'return id(sel_pagina).state != "Giardino";'
+              lambda: 'return id(sel_pagina).state != "Calendario";'
             then:
               - select.set:
                   id: sel_pagina
-                  option: "Giardino"
+                  option: "Calendario"
       widgets:
-        # ===== GRIGLIA 3+2 DI TILE =====
-        # Riga 1: luce esterna, consumo cucina, portafinestra
-        - button:
-            id: btn_luce_cucina
+        - obj:
             styles: [st_card]
             align: TOP_LEFT
             x: 20
             y: 84
-            width: 317
-            height: 200
+            width: 984
+            height: 128
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
-                        text: "\U000F0335"
-                        text_font: font_mdi_24
-                        text_color: 0xD7A24C
-              - label:
-                  id: lbl_btn_luce
-                  align: TOP_LEFT
-                  x: 58
-                  y: 2
-                  text: "Luce esterna"
-                  text_font: f_24
-                  styles: [st_label]
-            on_click:
-              - homeassistant.service:
-                  service: light.toggle
-                  data:
-                    entity_id: !secret ent_luce_cucina_est
-        - obj:
-            styles: [st_card]
-            align: TOP_LEFT
-            x: 353
-            y: 84
-            width: 317
-            height: 200
-            widgets:
-              - obj:
-                  styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 0
-                  width: 44
-                  height: 44
-                  widgets:
-                    - label:
-                        align: CENTER
-                        text: "\U000F0241"
-                        text_font: font_mdi_24
-                        text_color: 0x7FB3D5
-              - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 2
-                  text: "Consumo cucina"
-                  text_font: f_24
-                  styles: [st_label]
-              - label:
-                  id: lbl_g_consumo
-                  align: TOP_LEFT
-                  x: 58
-                  y: 38
-                  text: "--"
-                  styles: [st_value]
-        - obj:
-            styles: [st_card]
-            align: TOP_LEFT
-            x: 686
-            y: 84
-            width: 317
-            height: 200
-            widgets:
-              - obj:
-                  styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
-                  y: 0
-                  width: 44
-                  height: 44
-                  widgets:
-                    - label:
-                        id: lbl_porta_icon
-                        align: CENTER
-                        text: "\U000F11DB"
-                        text_font: font_mdi_24
+                        text: "\U000F044C"
+                        text_font: font_mdi
                         text_color: 0x8FBF9F
               - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 2
-                  text: "Portafinestra"
-                  text_font: f_24
-                  styles: [st_label]
+                  align: LEFT_MID
+                  x: 100
+                  y: -26
+                  text: "Raccolta differenziata"
+                  text_font: f_20
+                  text_color: 0x848D9C
               - label:
-                  id: lbl_porta
-                  align: TOP_LEFT
-                  x: 58
-                  y: 38
-                  text: "--"
+                  id: lbl_cal_rifiuti_msg
+                  align: LEFT_MID
+                  x: 100
+                  y: 12
+                  text: "Nessun impegno"
+                  text_font: f_32
+                  text_color: 0x848D9C
+              - label:
+                  id: lbl_cal_rifiuti_when
+                  align: RIGHT_MID
+                  x: -8
+                  y: 0
+                  text: ""
                   text_font: f_24
                   text_color: 0xE6EAF0
-        # Riga 2: temperatura, umidita
         - obj:
             styles: [st_card]
             align: TOP_LEFT
             x: 20
-            y: 300
-            width: 484
-            height: 200
+            y: 228
+            width: 984
+            height: 128
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
-                        text: "\U000F050F"
-                        text_font: font_mdi_24
-                        text_color: 0x8FBF9F
+                        text: "\U000F0322"
+                        text_font: font_mdi
+                        text_color: 0x7FB3D5
               - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 2
-                  text: "Temperatura"
+                  align: LEFT_MID
+                  x: 100
+                  y: -26
+                  text: "Whereveroffice"
+                  text_font: f_20
+                  text_color: 0x848D9C
+              - label:
+                  id: lbl_cal_office_msg
+                  align: LEFT_MID
+                  x: 100
+                  y: 12
+                  text: "Nessun impegno"
+                  text_font: f_32
+                  text_color: 0x848D9C
+              - label:
+                  id: lbl_cal_office_when
+                  align: RIGHT_MID
+                  x: -8
+                  y: 0
+                  text: ""
                   text_font: f_24
-                  styles: [st_label]
-              - label:
-                  id: lbl_g_temp
-                  align: TOP_LEFT
-                  x: 58
-                  y: 38
-                  text: "--"
-                  styles: [st_value]
+                  text_color: 0xE6EAF0
         - obj:
             styles: [st_card]
             align: TOP_LEFT
-            x: 520
-            y: 300
-            width: 484
-            height: 200
+            x: 20
+            y: 372
+            width: 984
+            height: 128
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
-                        text: "\U000F058E"
-                        text_font: font_mdi_24
-                        text_color: 0x7FB3D5
+                        text: "\U000F1055"
+                        text_font: font_mdi
+                        text_color: 0xD7A24C
               - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 2
-                  text: "Umidità"
+                  align: LEFT_MID
+                  x: 100
+                  y: -26
+                  text: "Pole Pole"
+                  text_font: f_20
+                  text_color: 0x848D9C
+              - label:
+                  id: lbl_cal_pole_msg
+                  align: LEFT_MID
+                  x: 100
+                  y: 12
+                  text: "Nessun impegno"
+                  text_font: f_32
+                  text_color: 0x848D9C
+              - label:
+                  id: lbl_cal_pole_when
+                  align: RIGHT_MID
+                  x: -8
+                  y: 0
+                  text: ""
                   text_font: f_24
-                  styles: [st_label]
-              - label:
-                  id: lbl_g_um
-                  align: TOP_LEFT
-                  x: 58
-                  y: 38
-                  text: "--"
-                  styles: [st_value]
+                  text_color: 0xE6EAF0
         - obj:
             align: BOTTOM_MID
             width: 1024
@@ -1980,15 +2012,12 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: "Giardino"
+                        text: "Calendario"
                   on_click:
                     - lvgl.page.show:
-                        id: page_giardino
+                        id: page_calendario
                         animation: FADE_IN
                         time: 150ms
-
-# Select esposto a HA per cambiare pagina da automazioni
-# (es. action: select.select_option -> "Energia")
 select:
   - platform: template
     name: "Pagina plancia"
@@ -1998,7 +2027,7 @@ select:
       - "Home"
       - "Casa"
       - "Energia"
-      - "Giardino"
+      - "Calendario"
     initial_option: "Home"
     set_action:
       - if:
@@ -2037,12 +2066,12 @@ select:
       - if:
           condition:
             and:
-              - lambda: 'return x == "Giardino";'
+              - lambda: 'return x == "Calendario";'
               - not:
-                  lvgl.page.is_showing: page_giardino
+                  lvgl.page.is_showing: page_calendario
           then:
             - lvgl.page.show:
-                id: page_giardino
+                id: page_calendario
                 animation: FADE_IN
                 time: 150ms
 

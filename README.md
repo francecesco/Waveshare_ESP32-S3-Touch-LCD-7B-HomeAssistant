@@ -5,7 +5,7 @@ ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), realizzata con **ESPH
 LVGL** e integrata con **Home Assistant**.
 
 UI a pagine: **Home** (orologio, temperature, umidità, consumi, persone), **Casa**,
-**Energia**, **Giardino**.
+**Energia**, **Calendario**.
 
 ## Funziona
 
@@ -107,7 +107,7 @@ Dettaglio completo in [ROADMAP.md](ROADMAP.md). In sintesi:
 - [x] Pagina **Energia**: tile con icone (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 - [x] Navbar con pulsante della pagina attiva evidenziato
 - [x] Pagina **Casa**: routine (script), controlli cucina (switch), robot aspirapolvere, tapparelle
-- [x] Pagina **Giardino**: luce e consumo cucina esterna, temperatura/umidità giardino, portafinestra
+- [x] Pagina **Calendario**: un riquadro per calendario Home Assistant (raccolta differenziata, whereveroffice, pole pole) col prossimo impegno e quando — "Oggi" / "Domani" / "24 ago", con l'orario solo se non e' un evento di giornata intera
 - [ ] **Restyling UI**: interfaccia più moderna e accattivante sfruttando stili, temi e animazioni LVGL
 - [ ] **Gestione accensione display**: accensione al tocco, spegnimento del backlight dopo 30 s di inutilizzo
 - [ ] (opzionale) icone anche sulla Home, sincronizzazione inversa del select pagina

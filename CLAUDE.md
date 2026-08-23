@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Obiettivo del progetto
 
-Plancia di controllo/informativa da ingresso basata sul display **Waveshare ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), con ESPHome + LVGL e integrazione Home Assistant. UI a pagine: Home (orologio, meteo, temperature, stato Tesla), Casa, Energia, Giardino.
+Plancia di controllo/informativa da ingresso basata sul display **Waveshare ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), con ESPHome + LVGL e integrazione Home Assistant. UI a pagine: Home, Energia, Casa, Calendario.
 
 **Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Resta una voce opzionale: IP statico — vedi [ROADMAP.md](ROADMAP.md). Lo spegnimento automatico del display **non** si fa nel firmware: e' gestito da un'automazione lato Home Assistant.
 
@@ -182,6 +182,7 @@ Gli `entity_id` reali stanno in `secrets.yaml` (non versionato), riferiti nel YA
 - **Energia**: `ent_potenza` (potenza attuale, kW), `ent_bolletta` (bolletta mese, €)
 - **Meteo**: `ent_meteo` (entità `weather.*`) — solo `text_sensor`: lo **stato** diventa glifo MDI + colore dell'icona nell'header. Il `sensor` con `attribute: temperature` è stato rimosso (la temperatura esterna viene dal sensore del giardino)
 - **Tesla (mese)**: `ent_tesla_costo` (€) e `ent_tesla_kwh_f1/f2/f3` — in HA non esiste un totale mensile, i kWh si **sommano per fascia** in un lambda (le fasce non ancora ricevute sono NaN → contate 0)
+- **Calendario**: `ent_cal_rifiuti`, `ent_cal_office`, `ent_cal_pole` — entita' `calendar.*`, lette con `text_sensor` + `attribute: message` / `attribute: start_time`
 - **Persone**: `ent_persona1`, `ent_persona2` + nomi visualizzati `nome_persona1`, `nome_persona2`
 
 Vedi `secrets.yaml.example` per il modello da compilare.
@@ -195,7 +196,11 @@ Dettaglio e riferimenti in [ROADMAP.md](ROADMAP.md).
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
 5. ✅ Pagina **Casa**: quattro macro tile 484x200 — Igor (l'`on_click` sceglie fra `vacuum.start` e `vacuum.return_to_base` con un `if` sullo stato di `st_vacuum`), Tapparelle (su/stop/giù dentro un'unica tile), routine Esco e Buonanotte. I controlli cucina e la routine Buongiorno sono stati rimossi: troppi bersagli e troppo piccoli. Gli `entity_id` restano in `secrets.yaml`.
-6. ✅ Pagina **Giardino**: luce cucina esterna (toggle), consumo cucina, temperatura/umidità giardino, portafinestra (icona aperta/chiusa)
+6. ✅ Pagina **Calendario**: un riquadro per calendario Home Assistant (raccolta differenziata, whereveroffice, pole pole) col prossimo impegno e quando — "Oggi" / "Domani" / "24 ago", con l'orario solo se non e' un evento di giornata intera
+
+   La pagina **Giardino** e' stata rimossa: le sue letture di temperatura e umidita' erano gia' sulla Home, e luce esterna, consumo cucina e portafinestra sono state giudicate non necessarie sulla plancia. Rimossi con essa i sensori `consumo_cucina`, `st_luce_cucina` e `st_porta`; gli `entity_id` restano in `secrets.yaml`.
+
+   **Limite da conoscere:** un'entita' `calendar.*` di Home Assistant espone **solo il prossimo evento**, nei suoi attributi (`message`, `start_time`, `all_day`). Per una vera agenda cronologica che mescoli piu' calendari servirebbe un sensore template lato HA. Qui si legge un attributo per volta con `text_sensor` + `attribute:`.
 7. ✅ **Restyling UI**: palette scura, header globale nel `top_layer`, tile piatte al posto dei gauge, dissolvenza fra le pagine, tipografia Poppins ritagliata per taglia
 9. (opzionale) sync inversa del `select` pagina verso Home Assistant
 10. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)
