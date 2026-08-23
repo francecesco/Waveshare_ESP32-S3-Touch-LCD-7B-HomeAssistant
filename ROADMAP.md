@@ -18,7 +18,11 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
       consumo, Tesla €/kWh)
 - [x] Pagina **Casa**: quattro macro tile — Igor (avvia / rimanda alla base a
       seconda dello stato), tapparelle (su/stop/giù), routine Esco e Buonanotte
-- [x] Pagina **Calendario**: un riquadro per calendario Home Assistant (raccolta differenziata, whereveroffice, pole pole) col prossimo impegno e quando — "Oggi" / "Domani" / "24 ago", con l'orario solo se non e' un evento di giornata intera
+- [x] Pagina **Calendario**: agenda cronologica a cinque righe che fonde i tre calendari HA
+      (raccolta differenziata, whereveroffice, pole pole) — "Oggi" / "Domani" /
+      "Gio 27", orario solo per gli eventi non di giornata intera. I dati arrivano
+      da `calendar.get_events` chiamata dal dispositivo con `capture_response`:
+      niente sensori template, **nessuna modifica a `configuration.yaml`**
 - [x] **Restyling UI**: palette scura ispirata agli screenshot di riferimento, header
       globale (ora/data/meteo/temperature) nel `top_layer`, tile piatte al posto dei
       gauge, transizioni in dissolvenza fra le pagine, tipografia Poppins (ritagliata

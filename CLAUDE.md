@@ -77,6 +77,49 @@ Per comandare HA dalla plancia (eseguire script, toggle switch, avviare il robot
 - **Feedback di stato** (es. switch acceso → pulsante colorato): `binary_sensor` / `text_sensor` `platform: homeassistant` con `on_state`/`on_value` → `lvgl.widget.update` (bg_color) o `lvgl.label.update`. I pulsanti da aggiornare hanno un `id`.
 - **Layout pulsanti**: icona MDI + testo **affiancati in orizzontale** (`align: LEFT_MID` con `x` diversi); impilarli verticalmente in pulsanti bassi li fa sovrapporre.
 
+### Agenda: leggere i calendari (`calendar.get_events` con risposta)
+
+Gli attributi di un'entita' `calendar.*` **non bastano** e non basteranno mai:
+
+- espongono al massimo il **prossimo** evento (`message`, `start_time`, `all_day`);
+- le agende Google condivise hanno `supported_features: 1` e non espongono
+  **nemmeno quello** — `calendar.pole_pole` restava a "Nessun impegno" pur avendo
+  quattro eventi. Nessun `text_sensor` + `attribute:` potra' leggerli;
+- un template Jinja lato HA non e' una via d'uscita: **i template non possono
+  chiamare azioni**, quindi nemmeno `calendar.get_events`.
+
+La via giusta e' che il **dispositivo chiami l'azione e ne riceva la risposta**.
+L'API nativa lo sa fare: `homeassistant.action` + `capture_response: true` +
+`on_success`, dove il lambda riceve un `JsonObjectConst response`. Serve ESPHome
+>= 2025.8 e HA recente (qui 2026.5.3 / 2026.8.3).
+
+- **`response_template` e' il pezzo che rende la cosa pratica.** Senza, arriva
+  il JSON grezzo di tutti gli eventi da parsare a bordo. Con, si manda a HA il
+  Jinja che unisce/ordina/formatta e torna **una stringa piccola**. HA lo esegue
+  ma non lo conserva: il template vive in `test-display3.yaml`, nel repo, e
+  **`configuration.yaml` non si tocca**.
+- **La risposta arriva sempre incartata**: `{"response": "<testo reso>"}`, anche
+  con un `response_template`. Sul device: `const char *raw = response["response"]`.
+- Formato scelto: 15 campi separati da `|` (5 righe x sorgente/quando/cosa),
+  sempre 15 anche se vuoti — il parsing a bordo e' un `find('|')` in ciclo.
+  Le righe senza evento nascondono la propria card (`lvgl.widget.hide`); se non
+  c'e' proprio nulla resta la sola label `lbl_cal_vuoto` al centro.
+- **Gli `entity_id` servono dentro il Jinja**, dove `!secret` non e' ammesso
+  (e' un tag YAML, non si puo' mettere a meta' di uno scalare). Si passano con
+  le **`substitutions:`**, che valgono `!secret` e vengono sostituite anche
+  dentro i block scalar e i lambda.
+- **Prerequisito**: lo stesso della pagina Casa — "Consenti al dispositivo di
+  eseguire azioni di Home Assistant" abilitato nell'integrazione.
+- **Il template si valida senza flashare**: `POST /api/template` con il Jinja
+  preceduto da `{%- set response = <JSON reale> -%}`, dove il JSON reale si
+  ottiene da `POST /api/services/calendar/get_events?return_response=true`.
+  Quattro minuti di compilazione risparmiati ad ogni giro.
+- **`on_client_connected` dell'`api:` scatta per ogni client**, incluso
+  `esphome logs`, non solo per HA. Va bene come innesco (l'agenda si ricarica
+  quando HA ricompare) ma non e' un segnale di "HA connesso".
+- La chiamata dell'azione **non viene loggata**: se va bene non si vede nulla.
+  L'unico riscontro nei log e' il `logger.log` dentro `on_error`.
+
 ## Hardware — dati certi
 
 | Parametro | Valore |
@@ -182,7 +225,7 @@ Gli `entity_id` reali stanno in `secrets.yaml` (non versionato), riferiti nel YA
 - **Energia**: `ent_potenza` (potenza attuale, kW), `ent_bolletta` (bolletta mese, €)
 - **Meteo**: `ent_meteo` (entità `weather.*`) — solo `text_sensor`: lo **stato** diventa glifo MDI + colore dell'icona nell'header. Il `sensor` con `attribute: temperature` è stato rimosso (la temperatura esterna viene dal sensore del giardino)
 - **Tesla (mese)**: `ent_tesla_costo` (€) e `ent_tesla_kwh_f1/f2/f3` — in HA non esiste un totale mensile, i kWh si **sommano per fascia** in un lambda (le fasce non ancora ricevute sono NaN → contate 0)
-- **Calendario**: `ent_cal_rifiuti`, `ent_cal_office`, `ent_cal_pole` — entita' `calendar.*`, lette con `text_sensor` + `attribute: message` / `attribute: start_time`
+- **Calendario**: `ent_cal_rifiuti`, `ent_cal_office`, `ent_cal_pole` — entita' `calendar.*`. Non sono lette come sensori: alimentano l'azione `calendar.get_events` dello script `aggiorna_agenda` (vedi "Agenda: leggere i calendari"). Sono anche esposte come **substitutions** (`cal_rifiuti`, `cal_office`, `cal_pole`), perche' servono dentro il template Jinja dove `!secret` non arriva
 - **Persone**: `ent_persona1`, `ent_persona2` + nomi visualizzati `nome_persona1`, `nome_persona2`
 
 Vedi `secrets.yaml.example` per il modello da compilare.
@@ -196,11 +239,11 @@ Dettaglio e riferimenti in [ROADMAP.md](ROADMAP.md).
 3. ✅ Pagina **Energia**: 6 tile con icone MDI (spesa oggi/previsione/mese scorso, consumo, Tesla €/kWh)
 4. ✅ Navbar con pulsante attivo evidenziato; titoli rimossi
 5. ✅ Pagina **Casa**: quattro macro tile 484x200 — Igor (l'`on_click` sceglie fra `vacuum.start` e `vacuum.return_to_base` con un `if` sullo stato di `st_vacuum`), Tapparelle (su/stop/giù dentro un'unica tile), routine Esco e Buonanotte. I controlli cucina e la routine Buongiorno sono stati rimossi: troppi bersagli e troppo piccoli. Gli `entity_id` restano in `secrets.yaml`.
-6. ✅ Pagina **Calendario**: un riquadro per calendario Home Assistant (raccolta differenziata, whereveroffice, pole pole) col prossimo impegno e quando — "Oggi" / "Domani" / "24 ago", con l'orario solo se non e' un evento di giornata intera
+6. ✅ Pagina **Calendario**: **agenda cronologica** che fonde i tre calendari HA (raccolta differenziata, whereveroffice, pole pole) — cinque righe in ordine di tempo, "Oggi" / "Domani" / "Gio 27", l'orario solo se non e' un evento di giornata intera, e un'icona colorata per calendario di provenienza
 
    La pagina **Giardino** e' stata rimossa: le sue letture di temperatura e umidita' erano gia' sulla Home, e luce esterna, consumo cucina e portafinestra sono state giudicate non necessarie sulla plancia. Rimossi con essa i sensori `consumo_cucina`, `st_luce_cucina` e `st_porta`; gli `entity_id` restano in `secrets.yaml`.
 
-   **Limite da conoscere:** un'entita' `calendar.*` di Home Assistant espone **solo il prossimo evento**, nei suoi attributi (`message`, `start_time`, `all_day`). Per una vera agenda cronologica che mescoli piu' calendari servirebbe un sensore template lato HA. Qui si legge un attributo per volta con `text_sensor` + `attribute:`.
+   Il perche' della meccanica insolita e' nella sezione "Agenda: leggere i calendari".
 7. ✅ **Restyling UI**: palette scura, header globale nel `top_layer`, tile piatte al posto dei gauge, dissolvenza fra le pagine, tipografia Poppins ritagliata per taglia
 9. (opzionale) sync inversa del `select` pagina verso Home Assistant
 10. IP statico DHCP per il MAC del dispositivo (riservarlo nel router)

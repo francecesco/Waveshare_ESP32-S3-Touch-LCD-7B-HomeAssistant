@@ -7,6 +7,14 @@
 #  Carica:  esphome run test-display3.yaml --device test-plancia.local
 # ============================================================================
 
+# Gli entity_id dei calendari servono anche DENTRO il template Jinja dell'agenda,
+# dove !secret non arriva: le substitutions sono l'unico modo di passarceli
+# tenendoli comunque fuori dal repo.
+substitutions:
+  cal_rifiuti: !secret ent_cal_rifiuti
+  cal_office: !secret ent_cal_office
+  cal_pole: !secret ent_cal_pole
+
 esphome:
   name: test-plancia
   friendly_name: Test Plancia
@@ -44,6 +52,9 @@ wifi:
     ssid: "Test-Plancia Fallback"
 
 api:
+  # Appena HA (ri)compare l'agenda a schermo e' certamente stantia: ricaricala.
+  on_client_connected:
+    - script.execute: aggiorna_agenda
 
 ota:
   - platform: esphome
@@ -365,127 +376,8 @@ sensor:
             auto v = [](float s) { return std::isnan(s) ? 0.0f : s; };
             return (v(id(tesla_kwh_f1).state) + v(id(tesla_kwh_f2).state) + v(id(tesla_kwh_f3).state)) > 220.0f
                 ? lv_color_hex(0xD2645E) : lv_color_hex(0xE6EAF0);
-  # --- Giardino: consumo cucina esterna ---# --- Persone (stato casa/fuori) ---
 text_sensor:
-  # --- Calendario: un'entita' calendar.* espone SOLO il prossimo evento,
-  #     nei suoi attributi. Per ciascuna servono due sensori: il titolo e quando.
-  - platform: homeassistant
-    id: cal_rifiuti_msg
-    entity_id: !secret ent_cal_rifiuti
-    attribute: message
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_rifiuti_msg
-          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
-          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
-  - platform: homeassistant
-    id: cal_rifiuti_start
-    entity_id: !secret ent_cal_rifiuti
-    attribute: start_time
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_rifiuti_when
-          text: !lambda |-
-            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
-            if (x.length() < 16) return std::string("");
-            int Y = atoi(x.substr(0, 4).c_str());
-            int M = atoi(x.substr(5, 2).c_str());
-            int D = atoi(x.substr(8, 2).c_str());
-            std::string ora_ev = x.substr(11, 5);
-            auto n = id(ora).now();
-            if (!n.is_valid()) return x.substr(0, 10);
-            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
-            std::string quando;
-            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
-            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
-            else {
-              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
-                                         "lug","ago","set","ott","nov","dic"};
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
-              quando = buf;
-            }
-            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
-            if (ora_ev != "00:00") quando += " " + ora_ev;
-            return quando;
-  - platform: homeassistant
-    id: cal_office_msg
-    entity_id: !secret ent_cal_office
-    attribute: message
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_office_msg
-          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
-          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
-  - platform: homeassistant
-    id: cal_office_start
-    entity_id: !secret ent_cal_office
-    attribute: start_time
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_office_when
-          text: !lambda |-
-            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
-            if (x.length() < 16) return std::string("");
-            int Y = atoi(x.substr(0, 4).c_str());
-            int M = atoi(x.substr(5, 2).c_str());
-            int D = atoi(x.substr(8, 2).c_str());
-            std::string ora_ev = x.substr(11, 5);
-            auto n = id(ora).now();
-            if (!n.is_valid()) return x.substr(0, 10);
-            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
-            std::string quando;
-            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
-            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
-            else {
-              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
-                                         "lug","ago","set","ott","nov","dic"};
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
-              quando = buf;
-            }
-            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
-            if (ora_ev != "00:00") quando += " " + ora_ev;
-            return quando;
-  - platform: homeassistant
-    id: cal_pole_msg
-    entity_id: !secret ent_cal_pole
-    attribute: message
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_pole_msg
-          text: !lambda 'return x.empty() ? std::string("Nessun impegno") : x;'
-          text_color: !lambda 'return x.empty() ? lv_color_hex(0x848D9C) : lv_color_hex(0xE6EAF0);'
-  - platform: homeassistant
-    id: cal_pole_start
-    entity_id: !secret ent_cal_pole
-    attribute: start_time
-    on_value:
-      - lvgl.label.update:
-          id: lbl_cal_pole_when
-          text: !lambda |-
-            // start_time arriva come "YYYY-MM-DD HH:MM:SS".
-            if (x.length() < 16) return std::string("");
-            int Y = atoi(x.substr(0, 4).c_str());
-            int M = atoi(x.substr(5, 2).c_str());
-            int D = atoi(x.substr(8, 2).c_str());
-            std::string ora_ev = x.substr(11, 5);
-            auto n = id(ora).now();
-            if (!n.is_valid()) return x.substr(0, 10);
-            auto dom = ESPTime::from_epoch_local(n.timestamp + 86400);
-            std::string quando;
-            if (Y == n.year && M == n.month && D == n.day_of_month)        quando = "Oggi";
-            else if (Y == dom.year && M == dom.month && D == dom.day_of_month) quando = "Domani";
-            else {
-              static const char* mm[] = {"gen","feb","mar","apr","mag","giu",
-                                         "lug","ago","set","ott","nov","dic"};
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%d %s", D, (M >= 1 && M <= 12) ? mm[M-1] : "?");
-              quando = buf;
-            }
-            // Mezzanotte esatta = evento di giornata intera: l'orario non aggiunge nulla.
-            if (ora_ev != "00:00") quando += " " + ora_ev;
-            return quando;
+  # --- Persone (stato casa/fuori) ---
   - platform: homeassistant
     id: pers_1
     entity_id: !secret ent_persona1
@@ -582,10 +474,6 @@ text_sensor:
             if (x == "cleaning" || x == "returning") return std::string("Alla base");
             return std::string("Avvia");
 
-# Stato switch cucina -> colora i pulsanti quando accesi (pagina Casa)
-binary_sensor:
-  # --- Giardino: luce cucina esterna (colore se accesa) ---
-  # --- Giardino: portafinestra (icona + testo aperta/chiusa) ---
 # Orologio via SNTP. Aggiorna ora e data (header Home) con on_time (contesto sicuro).
 time:
   - platform: sntp
@@ -614,6 +502,237 @@ time:
                 char buf[48];
                 snprintf(buf, sizeof(buf), "%s %d %s", gg[dow-1], t.day_of_month, mm[mo-1]);
                 return std::string(buf);
+
+# --- Agenda: i tre calendari uniti e ordinati cronologicamente ---------------
+# Un'entita' calendar.* espone al massimo il PROSSIMO evento nei suoi attributi,
+# e le agende Google condivise (supported_features: 1, es. Pole Pole) non
+# espongono nemmeno quello: la strada degli attributi e' strutturalmente cieca.
+# L'unica fonte completa e' l'azione calendar.get_events, e l'API nativa sa
+# chiamarla RESTITUENDO la risposta al dispositivo (capture_response). Il Jinja
+# che unisce, ordina e formatta viaggia insieme alla richiesta: vive qui, nel
+# repo, non in configuration.yaml. HA lo esegue ma non lo conserva.
+# La risposta torna come JSON {"response": "<testo reso>"}.
+globals:
+  - id: agenda
+    type: std::vector<std::string>
+    # 5 righe x 3 campi: sorgente, quando, cosa.
+    initial_value: 'std::vector<std::string>(15)'
+
+script:
+  - id: aggiorna_agenda
+    mode: restart
+    then:
+      - homeassistant.action:
+          action: calendar.get_events
+          data:
+            entity_id: "${cal_rifiuti}, ${cal_office}, ${cal_pole}"
+          data_template:
+            start_date_time: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+            end_date_time: "{{ (now() + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S') }}"
+          capture_response: true
+          response_template: |-
+            {%- set ns = namespace(rows=[]) -%}
+            {%- set tag = {'${cal_rifiuti}': 'R', '${cal_office}': 'O', '${cal_pole}': 'P'} -%}
+            {%- set oggi = now().strftime('%Y-%m-%d') -%}
+            {%- set domani = (now() + timedelta(days=1)).strftime('%Y-%m-%d') -%}
+            {%- set gg = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'] -%}
+            {%- for ent, val in response.items() -%}
+              {%- for e in val.events -%}
+                {#- un evento di giornata intera ha start "AAAA-MM-GG", senza ora -#}
+                {%- set intera = e.start | length == 10 -%}
+                {%- set key = e.start ~ 'T00:00' if intera
+                              else as_local(as_datetime(e.start)).strftime('%Y-%m-%dT%H:%M') -%}
+                {%- set giorno = key[:10] -%}
+                {%- if giorno <= oggi -%}
+                  {%- set et = 'Oggi' -%}
+                {%- elif giorno == domani -%}
+                  {%- set et = 'Domani' -%}
+                {%- else -%}
+                  {%- set et = gg[as_datetime(giorno).weekday()] ~ ' ' ~ (giorno[8:10] | int) -%}
+                {%- endif -%}
+                {%- set ns.rows = ns.rows + [[key, tag.get(ent, 'P'),
+                                              et if intera else et ~ ' ' ~ key[11:16],
+                                              e.summary | trim]] -%}
+              {%- endfor -%}
+            {%- endfor -%}
+            {#- la chiave di ordinamento e' ora locale, quindi ordina bene anche come stringa -#}
+            {%- set ord = ns.rows | sort(attribute='0') -%}
+            {%- set ns.out = [] -%}
+            {%- for i in range(5) -%}
+              {%- set ns.out = ns.out + (ord[i][1:] if i < ord | length else ['', '', '']) -%}
+            {%- endfor -%}
+            {{ ns.out | join('|') }}
+          on_success:
+            - lambda: |-
+                // 15 campi separati da '|'. Campi mancanti = stringhe vuote.
+                id(agenda).assign(15, std::string(""));
+                const char *raw = response["response"];
+                if (raw == nullptr) return;
+                std::string s(raw);
+                size_t da = 0;
+                for (int i = 0; i < 15; i++) {
+                  size_t p = s.find('|', da);
+                  id(agenda)[i] = (p == std::string::npos) ? s.substr(da) : s.substr(da, p - da);
+                  if (p == std::string::npos) break;
+                  da = p + 1;
+                }
+            # Agenda del tutto vuota: le righe spariscono, resta un messaggio al centro.
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[0].empty();'
+                then:
+                  - lvgl.label.update:
+                      id: lbl_cal_vuoto
+                      text: "Nessun impegno nei prossimi 30 giorni"
+                  - lvgl.widget.show: lbl_cal_vuoto
+                else:
+                  - lvgl.widget.hide: lbl_cal_vuoto
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[0].empty();'
+                then:
+                  - lvgl.widget.hide: card_cal1
+                else:
+                  - lvgl.widget.show: card_cal1
+            - lvgl.label.update:
+                id: ico_cal1
+                text: !lambda |-
+                  const std::string &t = id(agenda)[0];
+                  if (t == "R") return std::string("\U000F044C");  // recycle
+                  if (t == "O") return std::string("\U000F0322");  // laptop
+                  if (t == "P") return std::string("\U000F1055");  // palm-tree
+                  return std::string("");
+                text_color: !lambda |-
+                  const std::string &t = id(agenda)[0];
+                  if (t == "R") return lv_color_hex(0x8FBF9F);
+                  if (t == "O") return lv_color_hex(0x7FB3D5);
+                  return lv_color_hex(0xD7A24C);
+            - lvgl.label.update:
+                id: lbl_cal1_what
+                text: !lambda 'return id(agenda)[2];'
+            - lvgl.label.update:
+                id: lbl_cal1_when
+                text: !lambda 'return id(agenda)[1];'
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[3].empty();'
+                then:
+                  - lvgl.widget.hide: card_cal2
+                else:
+                  - lvgl.widget.show: card_cal2
+            - lvgl.label.update:
+                id: ico_cal2
+                text: !lambda |-
+                  const std::string &t = id(agenda)[3];
+                  if (t == "R") return std::string("\U000F044C");  // recycle
+                  if (t == "O") return std::string("\U000F0322");  // laptop
+                  if (t == "P") return std::string("\U000F1055");  // palm-tree
+                  return std::string("");
+                text_color: !lambda |-
+                  const std::string &t = id(agenda)[3];
+                  if (t == "R") return lv_color_hex(0x8FBF9F);
+                  if (t == "O") return lv_color_hex(0x7FB3D5);
+                  return lv_color_hex(0xD7A24C);
+            - lvgl.label.update:
+                id: lbl_cal2_what
+                text: !lambda 'return id(agenda)[5];'
+            - lvgl.label.update:
+                id: lbl_cal2_when
+                text: !lambda 'return id(agenda)[4];'
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[6].empty();'
+                then:
+                  - lvgl.widget.hide: card_cal3
+                else:
+                  - lvgl.widget.show: card_cal3
+            - lvgl.label.update:
+                id: ico_cal3
+                text: !lambda |-
+                  const std::string &t = id(agenda)[6];
+                  if (t == "R") return std::string("\U000F044C");  // recycle
+                  if (t == "O") return std::string("\U000F0322");  // laptop
+                  if (t == "P") return std::string("\U000F1055");  // palm-tree
+                  return std::string("");
+                text_color: !lambda |-
+                  const std::string &t = id(agenda)[6];
+                  if (t == "R") return lv_color_hex(0x8FBF9F);
+                  if (t == "O") return lv_color_hex(0x7FB3D5);
+                  return lv_color_hex(0xD7A24C);
+            - lvgl.label.update:
+                id: lbl_cal3_what
+                text: !lambda 'return id(agenda)[8];'
+            - lvgl.label.update:
+                id: lbl_cal3_when
+                text: !lambda 'return id(agenda)[7];'
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[9].empty();'
+                then:
+                  - lvgl.widget.hide: card_cal4
+                else:
+                  - lvgl.widget.show: card_cal4
+            - lvgl.label.update:
+                id: ico_cal4
+                text: !lambda |-
+                  const std::string &t = id(agenda)[9];
+                  if (t == "R") return std::string("\U000F044C");  // recycle
+                  if (t == "O") return std::string("\U000F0322");  // laptop
+                  if (t == "P") return std::string("\U000F1055");  // palm-tree
+                  return std::string("");
+                text_color: !lambda |-
+                  const std::string &t = id(agenda)[9];
+                  if (t == "R") return lv_color_hex(0x8FBF9F);
+                  if (t == "O") return lv_color_hex(0x7FB3D5);
+                  return lv_color_hex(0xD7A24C);
+            - lvgl.label.update:
+                id: lbl_cal4_what
+                text: !lambda 'return id(agenda)[11];'
+            - lvgl.label.update:
+                id: lbl_cal4_when
+                text: !lambda 'return id(agenda)[10];'
+            - if:
+                condition:
+                  lambda: 'return id(agenda)[12].empty();'
+                then:
+                  - lvgl.widget.hide: card_cal5
+                else:
+                  - lvgl.widget.show: card_cal5
+            - lvgl.label.update:
+                id: ico_cal5
+                text: !lambda |-
+                  const std::string &t = id(agenda)[12];
+                  if (t == "R") return std::string("\U000F044C");  // recycle
+                  if (t == "O") return std::string("\U000F0322");  // laptop
+                  if (t == "P") return std::string("\U000F1055");  // palm-tree
+                  return std::string("");
+                text_color: !lambda |-
+                  const std::string &t = id(agenda)[12];
+                  if (t == "R") return lv_color_hex(0x8FBF9F);
+                  if (t == "O") return lv_color_hex(0x7FB3D5);
+                  return lv_color_hex(0xD7A24C);
+            - lvgl.label.update:
+                id: lbl_cal5_what
+                text: !lambda 'return id(agenda)[14];'
+            - lvgl.label.update:
+                id: lbl_cal5_when
+                text: !lambda 'return id(agenda)[13];'
+          on_error:
+            # Se l'agenda era gia' a schermo la si lascia: dati vecchi valgono piu'
+            # di uno schermo vuoto. Il messaggio compare solo se non c'era nulla.
+            - logger.log:
+                format: "agenda: calendar.get_events fallita: %s"
+                args: ['error.c_str()']
+            - lvgl.label.update:
+                id: lbl_cal_vuoto
+                text: "Agenda non disponibile"
+
+# L'agenda invecchia da sola (passa mezzanotte, scatta un evento): ricontrollala
+# a intervalli. Qui l'interval non tocca LVGL, lancia solo la richiesta a HA.
+interval:
+  - interval: 15min
+    then:
+      - script.execute: aggiorna_agenda
 
 # --- DISPLAY mipi_rgb: ora pilotato da LVGL (niente lambda/test_card) ---
 display:
@@ -1808,6 +1927,7 @@ lvgl:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Calendario"
+        - script.execute: aggiorna_agenda
         - if:
             condition:
               lambda: 'return id(sel_pagina).state != "Calendario";'
@@ -1816,138 +1936,224 @@ lvgl:
                   id: sel_pagina
                   option: "Calendario"
       widgets:
+        # Messaggio a tutta pagina quando non c'e' nulla in agenda (o e' andata male).
+        - label:
+            id: lbl_cal_vuoto
+            align: TOP_MID
+            y: 240
+            text: "Carico agenda..."
+            text_font: f_32
+            text_color: 0x848D9C
         - obj:
+            id: card_cal1
             styles: [st_card]
+            hidden: true
             align: TOP_LEFT
             x: 20
             y: 84
             width: 984
-            height: 128
+            height: 72
             widgets:
               - obj:
                   styles: [st_chip]
                   align: LEFT_MID
-                  x: 8
+                  x: 4
                   y: 0
-                  width: 72
-                  height: 72
+                  width: 44
+                  height: 44
                   widgets:
                     - label:
+                        id: ico_cal1
                         align: CENTER
-                        text: "\U000F044C"
-                        text_font: font_mdi
-                        text_color: 0x8FBF9F
+                        text: ""
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
               - label:
+                  id: lbl_cal1_what
                   align: LEFT_MID
-                  x: 100
-                  y: -26
-                  text: "Raccolta differenziata"
-                  text_font: f_20
-                  text_color: 0x848D9C
-              - label:
-                  id: lbl_cal_rifiuti_msg
-                  align: LEFT_MID
-                  x: 100
-                  y: 12
-                  text: "Nessun impegno"
+                  x: 68
+                  y: 0
+                  width: 640
+                  long_mode: DOT
+                  text: ""
                   text_font: f_32
-                  text_color: 0x848D9C
+                  text_color: 0xE6EAF0
               - label:
-                  id: lbl_cal_rifiuti_when
+                  id: lbl_cal1_when
                   align: RIGHT_MID
                   x: -8
                   y: 0
                   text: ""
                   text_font: f_24
-                  text_color: 0xE6EAF0
+                  text_color: 0x7FB3D5
         - obj:
+            id: card_cal2
             styles: [st_card]
+            hidden: true
             align: TOP_LEFT
             x: 20
-            y: 228
+            y: 170
             width: 984
-            height: 128
+            height: 72
             widgets:
               - obj:
                   styles: [st_chip]
                   align: LEFT_MID
-                  x: 8
+                  x: 4
                   y: 0
-                  width: 72
-                  height: 72
+                  width: 44
+                  height: 44
                   widgets:
                     - label:
+                        id: ico_cal2
                         align: CENTER
-                        text: "\U000F0322"
-                        text_font: font_mdi
-                        text_color: 0x7FB3D5
+                        text: ""
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
               - label:
+                  id: lbl_cal2_what
                   align: LEFT_MID
-                  x: 100
-                  y: -26
-                  text: "Whereveroffice"
-                  text_font: f_20
-                  text_color: 0x848D9C
-              - label:
-                  id: lbl_cal_office_msg
-                  align: LEFT_MID
-                  x: 100
-                  y: 12
-                  text: "Nessun impegno"
+                  x: 68
+                  y: 0
+                  width: 640
+                  long_mode: DOT
+                  text: ""
                   text_font: f_32
-                  text_color: 0x848D9C
+                  text_color: 0xE6EAF0
               - label:
-                  id: lbl_cal_office_when
+                  id: lbl_cal2_when
                   align: RIGHT_MID
                   x: -8
                   y: 0
                   text: ""
                   text_font: f_24
-                  text_color: 0xE6EAF0
+                  text_color: 0x7FB3D5
         - obj:
+            id: card_cal3
             styles: [st_card]
+            hidden: true
             align: TOP_LEFT
             x: 20
-            y: 372
+            y: 256
             width: 984
-            height: 128
+            height: 72
             widgets:
               - obj:
                   styles: [st_chip]
                   align: LEFT_MID
-                  x: 8
+                  x: 4
                   y: 0
-                  width: 72
-                  height: 72
+                  width: 44
+                  height: 44
                   widgets:
                     - label:
+                        id: ico_cal3
                         align: CENTER
-                        text: "\U000F1055"
-                        text_font: font_mdi
-                        text_color: 0xD7A24C
+                        text: ""
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
               - label:
+                  id: lbl_cal3_what
                   align: LEFT_MID
-                  x: 100
-                  y: -26
-                  text: "Pole Pole"
-                  text_font: f_20
-                  text_color: 0x848D9C
-              - label:
-                  id: lbl_cal_pole_msg
-                  align: LEFT_MID
-                  x: 100
-                  y: 12
-                  text: "Nessun impegno"
+                  x: 68
+                  y: 0
+                  width: 640
+                  long_mode: DOT
+                  text: ""
                   text_font: f_32
-                  text_color: 0x848D9C
+                  text_color: 0xE6EAF0
               - label:
-                  id: lbl_cal_pole_when
+                  id: lbl_cal3_when
                   align: RIGHT_MID
                   x: -8
                   y: 0
                   text: ""
                   text_font: f_24
+                  text_color: 0x7FB3D5
+        - obj:
+            id: card_cal4
+            styles: [st_card]
+            hidden: true
+            align: TOP_LEFT
+            x: 20
+            y: 342
+            width: 984
+            height: 72
+            widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: LEFT_MID
+                  x: 4
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        id: ico_cal4
+                        align: CENTER
+                        text: ""
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
+              - label:
+                  id: lbl_cal4_what
+                  align: LEFT_MID
+                  x: 68
+                  y: 0
+                  width: 640
+                  long_mode: DOT
+                  text: ""
+                  text_font: f_32
                   text_color: 0xE6EAF0
+              - label:
+                  id: lbl_cal4_when
+                  align: RIGHT_MID
+                  x: -8
+                  y: 0
+                  text: ""
+                  text_font: f_24
+                  text_color: 0x7FB3D5
+        - obj:
+            id: card_cal5
+            styles: [st_card]
+            hidden: true
+            align: TOP_LEFT
+            x: 20
+            y: 428
+            width: 984
+            height: 72
+            widgets:
+              - obj:
+                  styles: [st_chip]
+                  align: LEFT_MID
+                  x: 4
+                  y: 0
+                  width: 44
+                  height: 44
+                  widgets:
+                    - label:
+                        id: ico_cal5
+                        align: CENTER
+                        text: ""
+                        text_font: font_mdi_24
+                        text_color: 0x848D9C
+              - label:
+                  id: lbl_cal5_what
+                  align: LEFT_MID
+                  x: 68
+                  y: 0
+                  width: 640
+                  long_mode: DOT
+                  text: ""
+                  text_font: f_32
+                  text_color: 0xE6EAF0
+              - label:
+                  id: lbl_cal5_when
+                  align: RIGHT_MID
+                  x: -8
+                  y: 0
+                  text: ""
+                  text_font: f_24
+                  text_color: 0x7FB3D5
         - obj:
             align: BOTTOM_MID
             width: 1024
