@@ -123,6 +123,11 @@ font:
     glyphs: "0123456789.,:-+ °€%kWhVA"
   # Taglie "testuali": Latin Core, che include gli accenti italiani.
   - file: "gfonts://Poppins@400"
+    id: f_32
+    size: 32
+    bpp: 4
+    glyphsets: [GF_Latin_Core]
+  - file: "gfonts://Poppins@400"
     id: f_24
     size: 24
     bpp: 4
@@ -1131,30 +1136,30 @@ lvgl:
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
                         text: "\U000F070D"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0x7FB3D5
               - label:
                   id: lbl_igor_act
-                  align: TOP_LEFT
-                  x: 58
-                  y: 4
+                  align: LEFT_MID
+                  x: 100
+                  y: -20
                   text: "Avvia"
-                  text_font: f_24
+                  text_font: f_32
                   text_color: 0xE6EAF0
               - label:
                   id: lbl_igor
-                  align: TOP_LEFT
-                  x: 58
-                  y: 40
+                  align: LEFT_MID
+                  x: 100
+                  y: 22
                   text: "--"
                   text_font: f_20
                   text_color: 0x848D9C
@@ -1185,20 +1190,20 @@ lvgl:
                   align: TOP_LEFT
                   x: 0
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 56
+                  height: 56
                   widgets:
                     - label:
                         align: CENTER
                         text: "\U000F111C"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0xD7A24C
               - label:
                   align: TOP_LEFT
-                  x: 58
-                  y: 4
+                  x: 100
+                  y: 8
                   text: "Tapparelle"
-                  text_font: f_24
+                  text_font: f_32
                   text_color: 0xE6EAF0
               - button:
                   styles: [st_btn]
@@ -1211,7 +1216,7 @@ lvgl:
                     - label:
                         align: CENTER
                         text: "\U000F0143"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0x8FBF9F
                   on_click:
                     - homeassistant.service:
@@ -1229,7 +1234,7 @@ lvgl:
                     - label:
                         align: CENTER
                         text: "\U000F04DB"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0xD2645E
                   on_click:
                     - homeassistant.service:
@@ -1247,7 +1252,7 @@ lvgl:
                     - label:
                         align: CENTER
                         text: "\U000F0140"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0xD7A24C
                   on_click:
                     - homeassistant.service:
@@ -1265,23 +1270,23 @@ lvgl:
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
                         text: "\U000F0A48"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0x8FBF9F
               - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 4
+                  align: LEFT_MID
+                  x: 100
+                  y: 0
                   text: "Esco"
-                  text_font: f_24
+                  text_font: f_32
                   text_color: 0xE6EAF0
             on_click:
               - homeassistant.service:
@@ -1299,23 +1304,23 @@ lvgl:
             widgets:
               - obj:
                   styles: [st_chip]
-                  align: TOP_LEFT
-                  x: 0
+                  align: LEFT_MID
+                  x: 8
                   y: 0
-                  width: 44
-                  height: 44
+                  width: 72
+                  height: 72
                   widgets:
                     - label:
                         align: CENTER
                         text: "\U000F0594"
-                        text_font: font_mdi_24
+                        text_font: font_mdi
                         text_color: 0x9E8FC7
               - label:
-                  align: TOP_LEFT
-                  x: 58
-                  y: 4
+                  align: LEFT_MID
+                  x: 100
+                  y: 0
                   text: "Buonanotte"
-                  text_font: f_24
+                  text_font: f_32
                   text_color: 0xE6EAF0
             on_click:
               - homeassistant.service:
