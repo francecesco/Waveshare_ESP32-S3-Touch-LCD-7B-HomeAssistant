@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Plancia di controllo/informativa da ingresso basata sul display **Waveshare ESP32-S3-Touch-LCD-7B** (7", 1024×600, touch capacitivo), con ESPHome + LVGL e integrazione Home Assistant. UI a pagine: Home (orologio, meteo, temperature, stato Tesla), Casa, Energia, Giardino.
 
-**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Restano due voci opzionali: sync inversa del `select` pagina e IP statico — vedi [ROADMAP.md](ROADMAP.md). Lo spegnimento automatico del display **non** si fa nel firmware: e' gestito da un'automazione lato Home Assistant.
+**Stato:** ✅ Display, touch, UI a pagine navigabile, orologio, **dati live da Home Assistant** e **restyling UI** completati (le quattro pagine sono tutte popolate). Resta una voce opzionale: IP statico — vedi [ROADMAP.md](ROADMAP.md). Lo spegnimento automatico del display **non** si fa nel firmware: e' gestito da un'automazione lato Home Assistant.
 
 ## Comandi principali
 

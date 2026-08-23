@@ -729,6 +729,16 @@ lvgl:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Home"
+        # Sync inversa: la pagina si annuncia a Home Assistant, comunque ci si
+        # sia arrivati (dito, automazione, riavvio). Il confronto evita di
+        # riscrivere un valore identico.
+        - if:
+            condition:
+              lambda: 'return id(sel_pagina).state != "Home";'
+            then:
+              - select.set:
+                  id: sel_pagina
+                  option: "Home"
       widgets:
         # Ora / data / meteo / temperature stanno nel top_layer, condiviso da tutte le pagine.
         # ===== GRIGLIA 3x3 DI TILE =====
@@ -1124,6 +1134,16 @@ lvgl:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Casa"
+        # Sync inversa: la pagina si annuncia a Home Assistant, comunque ci si
+        # sia arrivati (dito, automazione, riavvio). Il confronto evita di
+        # riscrivere un valore identico.
+        - if:
+            condition:
+              lambda: 'return id(sel_pagina).state != "Casa";'
+            then:
+              - select.set:
+                  id: sel_pagina
+                  option: "Casa"
       widgets:
         - button:
             styles: [st_card]
@@ -1404,6 +1424,16 @@ lvgl:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Energia"
+        # Sync inversa: la pagina si annuncia a Home Assistant, comunque ci si
+        # sia arrivati (dito, automazione, riavvio). Il confronto evita di
+        # riscrivere un valore identico.
+        - if:
+            condition:
+              lambda: 'return id(sel_pagina).state != "Energia";'
+            then:
+              - select.set:
+                  id: sel_pagina
+                  option: "Energia"
       widgets:
         # ===== GRIGLIA 3x2 DI TILE =====
         # Riga 1: spesa oggi, previsione mese, mese scorso
@@ -1695,6 +1725,16 @@ lvgl:
         - lvgl.label.update:
             id: lbl_page_name
             text: "Giardino"
+        # Sync inversa: la pagina si annuncia a Home Assistant, comunque ci si
+        # sia arrivati (dito, automazione, riavvio). Il confronto evita di
+        # riscrivere un valore identico.
+        - if:
+            condition:
+              lambda: 'return id(sel_pagina).state != "Giardino";'
+            then:
+              - select.set:
+                  id: sel_pagina
+                  option: "Giardino"
       widgets:
         # ===== GRIGLIA 3+2 DI TILE =====
         # Riga 1: luce esterna, consumo cucina, portafinestra
@@ -1963,7 +2003,10 @@ select:
     set_action:
       - if:
           condition:
-            lambda: 'return x == "Home";'
+            and:
+              - lambda: 'return x == "Home";'
+              - not:
+                  lvgl.page.is_showing: page_home
           then:
             - lvgl.page.show:
                 id: page_home
@@ -1971,7 +2014,10 @@ select:
                 time: 150ms
       - if:
           condition:
-            lambda: 'return x == "Casa";'
+            and:
+              - lambda: 'return x == "Casa";'
+              - not:
+                  lvgl.page.is_showing: page_casa
           then:
             - lvgl.page.show:
                 id: page_casa
@@ -1979,7 +2025,10 @@ select:
                 time: 150ms
       - if:
           condition:
-            lambda: 'return x == "Energia";'
+            and:
+              - lambda: 'return x == "Energia";'
+              - not:
+                  lvgl.page.is_showing: page_energia
           then:
             - lvgl.page.show:
                 id: page_energia
@@ -1987,7 +2036,10 @@ select:
                 time: 150ms
       - if:
           condition:
-            lambda: 'return x == "Giardino";'
+            and:
+              - lambda: 'return x == "Giardino";'
+              - not:
+                  lvgl.page.is_showing: page_giardino
           then:
             - lvgl.page.show:
                 id: page_giardino

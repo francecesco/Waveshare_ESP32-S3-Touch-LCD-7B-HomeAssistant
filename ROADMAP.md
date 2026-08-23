@@ -12,6 +12,8 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
       temperatura e umidità (×3 stanze), potenza, bolletta, presenza persone —
       tutti live da Home Assistant
 - [x] Controllo della pagina visualizzata da Home Assistant (entità `select`)
+- [x] Sincronizzazione **bidirezionale** del `select` pagina: la plancia annuncia
+      a HA la pagina su cui si trova, comunque ci si sia arrivati
 - [x] Pagina **Energia**: tile con icone MDI (spesa oggi / previsione / mese scorso,
       consumo, Tesla €/kWh)
 - [x] Pagina **Casa**: quattro macro tile — Igor (avvia / rimanda alla base a
@@ -26,7 +28,6 @@ Stato dei lavori e prossimi passi. Le note tecniche di dettaglio stanno in
 
 ## In programma
 
-- [ ] (opzionale) sincronizzazione inversa del `select` pagina verso Home Assistant
 - [ ] IP statico: riservare il DHCP per il MAC del dispositivo nel router
 
 ## Non si fa
